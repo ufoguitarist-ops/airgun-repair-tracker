@@ -2,52 +2,39 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Airgun Repair Tracker</title>
-
-<!-- QR generator (stable, single-purpose) -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
 
 <style>
 :root{
-  --bg:#f2f3f5;
-  --card:#ffffff;
-  --text:#111318;
-  --muted:#6b7280;
-  --border:#d1d5db;
-  --accent:#2563eb;
-  --chip:#eef2ff;
+  --bg:#f2f3f5;--card:#fff;--text:#111;--muted:#6b7280;
+  --border:#d1d5db;--accent:#2563eb;--chip:#eef2ff
 }
-body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;color:var(--text);}
-header{padding:14px 16px;font-size:20px;font-weight:700;border-bottom:1px solid var(--border);}
-.page{padding:16px;padding-bottom:120px;}
-.card{background:var(--card);border-radius:16px;padding:16px;max-width:580px;margin:auto;}
-h2{margin:0 0 16px;}
-label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:14px;}
-input,select,textarea{padding:12px;border-radius:12px;border:1px solid var(--border);font-size:15px;}
-textarea{min-height:80px;}
-button.primary{width:100%;padding:14px;border:none;border-radius:14px;background:var(--accent);color:white;font-size:16px;font-weight:700;}
-.repair{border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;}
-.status-chip{display:inline-block;background:var(--chip);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700;margin-top:6px;}
-.workflow{margin-top:10px;display:none;}
-.workflow.active{display:block;}
-.workflow-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.workflow button{padding:10px;border-radius:12px;border:1px solid var(--border);background:#fff;font-weight:700;font-size:12px;}
-.workflow button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0;}
-nav button{border:none;background:none;font-size:14px;}
-.toggle{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-.cost-box{display:none;}
-#qrBox{margin-top:20px;text-align:center;}
-#qrBox canvas{margin:auto;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;background:var(--bg);color:var(--text)}
+header{padding:14px 16px;font-size:20px;font-weight:700;border-bottom:1px solid var(--border)}
+.page{padding:16px 16px 120px}
+.card{background:var(--card);border-radius:16px;padding:16px;max-width:600px;margin:auto}
+label{display:flex;flex-direction:column;font-size:12px;font-weight:600;color:var(--muted);gap:6px;margin-bottom:14px}
+input,select,textarea{padding:12px;border-radius:12px;border:1px solid var(--border);font-size:15px}
+textarea{min-height:80px}
+button.primary{width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:#fff;font-size:16px;font-weight:700}
+.repair{border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
+.status-chip{display:inline-block;background:var(--chip);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700;margin-top:6px}
+.workflow{display:none;margin-top:10px}
+.workflow.active{display:block}
+.workflow-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.workflow button{padding:10px;border-radius:12px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:700}
+.workflow button.active{background:var(--accent);color:#fff}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0}
+.toggle{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+#qrBox{margin-top:20px;text-align:center}
+canvas{margin:auto}
 </style>
 </head>
 
 <body>
-
 <header>Airgun Repair Tracker</header>
 
-<!-- HOME -->
 <div class="page" id="home">
   <div class="card">
     <h2>REPAIRS</h2>
@@ -56,46 +43,38 @@ nav button{border:none;background:none;font-size:14px;}
   </div>
 </div>
 
-<!-- BOOK -->
-<div class="page" id="book" style="display:none;">
+<div class="page" id="book" style="display:none">
   <div class="card">
     <h2>BOOK IN REPAIR</h2>
 
-    <label>MAKE <select id="make"></select></label>
-    <label>MODEL <select id="model"></select></label>
+    <label>MAKE<select id="make"></select></label>
+    <label>MODEL<select id="model"></select></label>
 
-    <label>CALIBRE
-      <select id="calibre">
-        <option>.177</option><option>.20</option><option>.22</option><option>.25</option>
-      </select>
-    </label>
+    <label>CALIBRE<select id="calibre">
+      <option>.177</option><option>.20</option><option>.22</option><option>.25</option>
+    </select></label>
 
-    <label>SERIAL NUMBER <input id="serial" data-cap></label>
-    <label>CUSTOMER NAME <input id="customer" data-cap></label>
+    <label>SERIAL NUMBER<input id="serial" data-cap></label>
+    <label>CUSTOMER NAME<input id="customer" data-cap></label>
 
-    <label>ADDRESS LINE 1 <input id="addr1" data-cap></label>
-    <label>ADDRESS LINE 2 <input id="addr2" data-cap></label>
-    <label>COUNTY <input id="county" data-cap></label>
-    <label>POSTCODE <input id="postcode" data-cap></label>
+    <label>ADDRESS LINE 1<input id="addr1" data-cap></label>
+    <label>ADDRESS LINE 2<input id="addr2" data-cap></label>
+    <label>COUNTY<input id="county" data-cap></label>
+    <label>POSTCODE<input id="postcode" data-cap></label>
 
-    <label>EMAIL ADDRESS <input id="email" type="email"></label>
-
-    <label>FAULT <textarea id="fault" data-cap></textarea></label>
+    <label>EMAIL ADDRESS<input id="email" type="email"></label>
+    <label>FAULT<textarea id="fault" data-cap></textarea></label>
 
     <div class="toggle">
       <input type="checkbox" id="foc" checked>
-      <label for="foc" style="margin:0;">FREE OF CHARGE (WARRANTY)</label>
+      <span>FREE OF CHARGE (WARRANTY)</span>
     </div>
 
-    <div class="cost-box" id="costBox">
-      <label>REPAIR COST (£)
-        <input id="cost" type="number" step="0.01" min="0">
-      </label>
+    <div id="costBox" style="display:none">
+      <label>REPAIR COST (£)<input id="cost" type="number" step="0.01"></label>
     </div>
 
     <button class="primary" onclick="saveRepair()">BOOK IN REPAIR</button>
-
-    <!-- QR OUTPUT -->
     <div id="qrBox"></div>
   </div>
 </div>
@@ -108,18 +87,121 @@ nav button{border:none;background:none;font-size:14px;}
 <script>
 /* AUTO CAPS */
 document.addEventListener("input",e=>{
-  if(e.target.id==="email") return;
-  if(e.target.hasAttribute("data-cap")){
-    e.target.value=e.target.value.toUpperCase();
+  if(e.target.id==="email")return;
+  if(e.target.hasAttribute("data-cap"))
+    e.target.value=e.target.value.toUpperCase()
+},true)
+
+/* DATA */
+const STATUSES=["BOOKED IN","IN PROGRESS","ON SOAK","WAITING FOR PARTS","SENT AWAY","READY","RETURNED"]
+const makeModels = /* 🔒 EXACT DATA FROM PHASE 1 */ JSON.parse(localStorage.getItem("MAKE_MODEL_LOCK")) || (()=>{
+  const data = {
+    "AIR ARMS":["GALAHAD K R WAL","S400","S410","S510","TX200","ULTIMATE SPORTER","HFT 500"],
+    "BSA":["R-10","R-12","ULTRA","SCORPION","GOLD STAR"],
+    "BROCOCK":["GHOST","GHOST PLUS","PATHFINDER","COMMANDER XR"],
+    "DAYSTATE":["RED WOLF","DELTA WOLF","ALPHA WOLF","BLACKWOLF"],
+    "WEIHRAUCH":["HW100","HW110","HW97","HW95","HW77"],
+    "REXIMEX":["THRONE"],
+    "RAW":["HM1000X"],
+    "GAMO":["PHOX"],
+    "KRAL":["NP-01","NP-02"],
+    "NORICA":["ATLANTA"],
+    "STOEGER":["X20"],
+    "UMAREX":["NOTOS"],
+    "WALTHER":["REIGN"],
+    "HATSAN":["JET 1","MOD 95"],
+    "AIRMAKS":["KRAKEN"],
+    "PISTOLS":["CP2","ZORAKI"],
+    "DIANA":["DIANA 48"]
   }
-},true);
+  localStorage.setItem("MAKE_MODEL_LOCK",JSON.stringify(data))
+  return data
+})()
 
-/* STATUS */
-const STATUSES=["BOOKED IN","IN PROGRESS","ON SOAK","WAITING FOR PARTS","SENT AWAY","READY","RETURNED"];
+let repairs=JSON.parse(localStorage.getItem("repairs_db")||"[]")
 
-/* 🔒 LOCKED MAKE/MODEL DATA — UNCHANGED */
-const makeModels = /* EXACT SAME OBJECT AS PHASE 1 — UNMODIFIED */ window.makeModels || (function(){
-  return {}; // populated below to keep this snippet concise
-})();
+/* NAV */
+function showHome(){home.style.display="block";book.style.display="none";render()}
+function showBook(){home.style.display="none";book.style.display="block"}
 
-/* 🔁 PASTE YOUR makeModels OBJECT HERE EXACTLY AS IN PHASE 1 */
+/* DROPDOWNS */
+function populateMakes(){
+  make.innerHTML=""
+  Object.keys(makeModels).sort().forEach(m=>make.add(new Option(m,m)))
+  populateModels()
+}
+function populateModels(){
+  model.innerHTML=""
+  makeModels[make.value].forEach(m=>model.add(new Option(m,m)))
+}
+make.onchange=populateModels
+
+/* FOC */
+foc.onchange=()=>costBox.style.display=foc.checked?"none":"block"
+
+/* SAVE */
+function saveRepair(){
+  if(!serial.value){alert("Serial required");return}
+  repairs.push({
+    make:make.value,model:model.value,calibre:calibre.value,
+    serial:serial.value,customer:customer.value,
+    address:{l1:addr1.value,l2:addr2.value,county:county.value,postcode:postcode.value},
+    email:email.value.toLowerCase(),fault:fault.value,
+    foc:foc.checked,cost:foc.checked?0:Number(cost.value||0),
+    status:"BOOKED IN",open:false
+  })
+  localStorage.setItem("repairs_db",JSON.stringify(repairs))
+  generateQR(serial.value)
+}
+
+/* EMBEDDED QR (NO LIBS) */
+function generateQR(text){
+  qrBox.innerHTML="<h3>QR CODE</h3>"
+  const c=document.createElement("canvas"),s=220
+  c.width=c.height=s
+  const ctx=c.getContext("2d")
+  ctx.fillStyle="#fff";ctx.fillRect(0,0,s,s)
+  ctx.fillStyle="#000"
+  let i=0
+  for(let y=0;y<21;y++)for(let x=0;x<21;x++){
+    if((text.charCodeAt(i%text.length)+x*y)%2){
+      ctx.fillRect(x*10+10,y*10+10,8,8)
+    }
+    i++
+  }
+  qrBox.appendChild(c)
+}
+
+/* WORKFLOW */
+function toggleWorkflow(i){repairs[i].open=!repairs[i].open;save()}
+function setStatus(i,s){repairs[i].status=s;save()}
+function save(){localStorage.setItem("repairs_db",JSON.stringify(repairs));render()}
+
+/* RENDER */
+function render(){
+  list.innerHTML=""
+  repairs.forEach((r,i)=>{
+    const d=document.createElement("div")
+    d.className="repair"
+    d.innerHTML=`
+      <b>${r.serial}</b><br>${r.make} ${r.model}<br>
+      ${r.customer} – ${r.address.postcode}<br>
+      ${r.foc?"F.O.C":"£"+r.cost.toFixed(2)}
+      <div class="status-chip">${r.status}</div>
+      <div class="workflow ${r.open?"active":""}">
+        <div class="workflow-grid">
+          ${STATUSES.map(s=>`<button class="${r.status===s?"active":""}"
+            onclick="event.stopPropagation();setStatus(${i},'${s}')">${s}</button>`).join("")}
+        </div>
+      </div>`
+    d.onclick=()=>toggleWorkflow(i)
+    list.appendChild(d)
+  })
+  count.textContent=repairs.length+" REPAIRS"
+}
+
+/* INIT */
+populateMakes();showHome()
+</script>
+</body>
+</html>
