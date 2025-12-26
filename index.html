@@ -6,7 +6,6 @@
 <title>Airgun Repair Tracker</title>
 
 <style>
-/* ================= THEME ================= */
 :root{
   --bg:#f2f3f5;
   --card:#ffffff;
@@ -15,27 +14,22 @@
   --border:#d1d5db;
   --accent:#2563eb;
 }
-
 body{
   margin:0;
   background:var(--bg);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
   color:var(--text);
 }
-
 header{
   padding:14px 16px;
   font-size:20px;
   font-weight:700;
   border-bottom:1px solid var(--border);
 }
-
-/* ================= PAGE ================= */
 .page{
   padding:16px;
   padding-bottom:90px;
 }
-
 .card{
   background:var(--card);
   border-radius:16px;
@@ -43,12 +37,7 @@ header{
   max-width:520px;
   margin:auto;
 }
-
-h2{
-  margin:0 0 16px;
-}
-
-/* ================= FORM ================= */
+h2{margin:0 0 16px;}
 label{
   display:flex;
   flex-direction:column;
@@ -58,23 +47,13 @@ label{
   color:var(--muted);
   margin-bottom:18px;
 }
-
-label small{
-  font-size:11px;
-  font-weight:400;
-}
-
+label small{font-size:11px;font-weight:400;}
 input,select,textarea{
   padding:12px;
   border-radius:12px;
   border:1px solid var(--border);
   font-size:15px;
 }
-
-textarea{
-  resize:vertical;
-}
-
 button.primary{
   width:100%;
   padding:14px;
@@ -85,22 +64,17 @@ button.primary{
   font-size:16px;
   font-weight:700;
 }
-
-/* ================= LIST ================= */
 .repair{
   border:1px solid var(--border);
   border-radius:14px;
   padding:14px;
   margin-bottom:12px;
 }
-
 .status{
   margin-top:6px;
   font-size:12px;
   font-weight:700;
 }
-
-/* ================= NAV ================= */
 nav{
   position:fixed;
   bottom:0;
@@ -112,7 +86,6 @@ nav{
   justify-content:space-around;
   padding:10px 0;
 }
-
 nav button{
   border:none;
   background:none;
@@ -125,7 +98,7 @@ nav button{
 
 <header>Airgun Repair Tracker</header>
 
-<!-- ================= HOME ================= -->
+<!-- HOME -->
 <div class="page" id="home">
   <div class="card">
     <h2>REPAIRS</h2>
@@ -134,7 +107,7 @@ nav button{
   </div>
 </div>
 
-<!-- ================= BOOK ================= -->
+<!-- BOOK -->
 <div class="page" id="book" style="display:none;">
   <div class="card">
 
@@ -190,25 +163,45 @@ nav button{
 <script>
 /* ================= STORAGE ================= */
 const REPAIR_KEY = "repairs_db";
-const MODEL_KEY = "make_model_db";
+const MODEL_KEY  = "make_model_full_db";
 
 let repairs = JSON.parse(localStorage.getItem(REPAIR_KEY) || "[]");
-let makeModels = JSON.parse(localStorage.getItem(MODEL_KEY) || "{}");
+let makeModels = JSON.parse(localStorage.getItem(MODEL_KEY) || "null");
 
-/* ================= DEFAULT SEED ================= */
-if (Object.keys(makeModels).length === 0) {
-  makeModels = {
-    "AIR ARMS": ["S410", "S510", "GALAHAD"],
-    "BSA": ["R10", "ULTRA"],
-    "DAYSTATE": ["RED WOLF", "DELTA WOLF"]
-  };
-  saveModels();
+/* ================= FULL MAKE / MODEL LIST ================= */
+if(!makeModels){
+makeModels = {
+  "AIR ARMS": ["S200","S200 WAL","S400","S400K","S410","S410K","S500","S510","TX200","TX200 HC","ULTIMATE SPORTER","GALAHAD","KYMIRA"],
+  "BSA": ["R10","R10 SE","R12","ULTRA","SCORPION","LIGHTNING","GOLD STAR"],
+  "BROCOCK": ["BRK GHOST","BRK GHOST PLUS","COMMANDER XR","SNIPER XR","PATHFINDER"],
+  "DAYSTATE": [
+    "DELTA WOLF","DELTA WOLF BRONZE",
+    "RED WOLF","RED WOLF HI-LITE",
+    "ALPHA WOLF TAC LAM",
+    "ALPHA WOLF BRONZE SAFARI",
+    "ALPHA WOLF BLUE SE",
+    "WOLVERINE",
+    "BLACKWOLF R C","BLACKWOLF R B"
+  ],
+  "WEIHRAUCH": ["HW30","HW35","HW77","HW80","HW95","HW97","HW100","HW110","HW44","HW45"],
+  "RAW": ["HM1000X","HM1000X LRT"],
+  "REXIMEX": ["THRONE"],
+  "HATSAN": ["JET 1","JET 2","MOD 95"],
+  "GAMO": ["PHOX"],
+  "STOEGER": ["X10","X20"],
+  "UMAREX": ["NOTOS"],
+  "WALTHER": ["REIGN"],
+  "NORICA": ["ATLANTA","OMNIA"],
+  "DIANA": ["48"],
+  "AIRMAKS": ["KRAKEN","KRAKEN X","PRIME"]
+};
+localStorage.setItem(MODEL_KEY, JSON.stringify(makeModels));
 }
 
 /* ================= HELPERS ================= */
-function caps(v){ return v.toUpperCase(); }
-function saveRepairs(){ localStorage.setItem(REPAIR_KEY, JSON.stringify(repairs)); }
-function saveModels(){ localStorage.setItem(MODEL_KEY, JSON.stringify(makeModels)); }
+function caps(v){return v.toUpperCase();}
+function saveRepairs(){localStorage.setItem(REPAIR_KEY,JSON.stringify(repairs));}
+function saveModels(){localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));}
 
 /* ================= NAV ================= */
 function showHome(){
@@ -224,14 +217,13 @@ function showBook(){
 /* ================= DROPDOWNS ================= */
 function populateMakes(){
   make.innerHTML="";
-  Object.keys(makeModels).forEach(m=>{
+  Object.keys(makeModels).sort().forEach(m=>{
     const o=document.createElement("option");
     o.textContent=m;
     make.appendChild(o);
   });
   populateModels();
 }
-
 function populateModels(){
   model.innerHTML="";
   (makeModels[make.value]||[]).forEach(m=>{
@@ -240,24 +232,22 @@ function populateModels(){
     model.appendChild(o);
   });
 }
-
-make.onchange = populateModels;
+make.onchange=populateModels;
 
 /* ================= ADD MAKE / MODEL ================= */
-make.ondblclick = ()=>{
-  const m = prompt("ADD NEW MAKE");
-  if(!m) return;
-  const M = caps(m);
+make.ondblclick=()=>{
+  const m=prompt("ADD NEW MAKE");
+  if(!m)return;
+  const M=caps(m);
   if(!makeModels[M]) makeModels[M]=[];
   saveModels();
   populateMakes();
   make.value=M;
 };
-
-model.ondblclick = ()=>{
-  const m = prompt("ADD NEW MODEL FOR " + make.value);
-  if(!m) return;
-  const M = caps(m);
+model.ondblclick=()=>{
+  const m=prompt("ADD NEW MODEL FOR "+make.value);
+  if(!m)return;
+  const M=caps(m);
   makeModels[make.value].push(M);
   saveModels();
   populateModels();
@@ -267,13 +257,13 @@ model.ondblclick = ()=>{
 /* ================= SAVE ================= */
 function saveRepair(){
   repairs.push({
-    make: make.value,
-    model: model.value,
-    calibre: calibre.value,
-    serial: caps(serial.value),
-    customer: caps(customer.value),
-    fault: caps(fault.value),
-    status: "BOOKED IN"
+    make:make.value,
+    model:model.value,
+    calibre:calibre.value,
+    serial:caps(serial.value),
+    customer:caps(customer.value),
+    fault:caps(fault.value),
+    status:"BOOKED IN"
   });
   saveRepairs();
   showHome();
@@ -292,7 +282,7 @@ function render(){
     `;
     list.appendChild(d);
   });
-  count.textContent = repairs.length + " REPAIRS";
+  count.textContent=repairs.length+" REPAIRS";
 }
 
 /* ================= INIT ================= */
