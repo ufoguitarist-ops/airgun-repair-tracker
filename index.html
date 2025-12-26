@@ -25,7 +25,6 @@ label small{font-size:11px;font-weight:400;}
 input,select,textarea{padding:12px;border-radius:12px;border:1px solid var(--border);font-size:15px;}
 button.primary{width:100%;padding:14px;border:none;border-radius:14px;background:var(--accent);color:white;font-size:16px;font-weight:700;}
 .repair{border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;}
-.repair strong{display:block;margin-bottom:6px;}
 .status-chip{display:inline-block;background:var(--chip);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700;margin-top:6px;}
 .workflow{margin-top:12px;display:none;}
 .workflow.active{display:block;}
@@ -41,7 +40,6 @@ nav button{border:none;background:none;font-size:14px;}
 
 <header>Airgun Repair Tracker</header>
 
-<!-- HOME -->
 <div class="page" id="home">
   <div class="card">
     <h2>REPAIRS</h2>
@@ -50,27 +48,21 @@ nav button{border:none;background:none;font-size:14px;}
   </div>
 </div>
 
-<!-- BOOK -->
 <div class="page" id="book" style="display:none;">
   <div class="card">
     <h2>BOOK IN REPAIR</h2>
 
     <label>MAKE
       <select id="make"></select>
-      <small>Double-tap to add new make</small>
     </label>
 
     <label>MODEL
       <select id="model"></select>
-      <small>Double-tap to add new model</small>
     </label>
 
     <label>CALIBRE
       <select id="calibre">
-        <option>.177</option>
-        <option>.20</option>
-        <option>.22</option>
-        <option>.25</option>
+        <option>.177</option><option>.20</option><option>.22</option><option>.25</option>
       </select>
     </label>
 
@@ -96,111 +88,96 @@ nav button{border:none;background:none;font-size:14px;}
 </nav>
 
 <script>
-/* ================= STORAGE ================= */
+/* ========= CONSTANTS ========= */
 const REPAIR_KEY="repairs_db";
 const MODEL_KEY="make_model_master_excel";
 
-/* ================= STATUS ================= */
-const STATUSES=[
-  "BOOKED IN","IN PROGRESS","ON SOAK","WAITING FOR PARTS","SENT AWAY","READY","RETURNED"
-];
-
-/* ================= DATA ================= */
-let makeModels = JSON.parse(localStorage.getItem(MODEL_KEY));
-let repairs = JSON.parse(localStorage.getItem(REPAIR_KEY)||"[]");
-
-/* ================= AUTO CAPITALS ================= */
-document.addEventListener("input", e=>{
+/* ========= AUTO CAPS ========= */
+document.addEventListener("input",e=>{
   if(!e.target.dataset.cap) return;
-  const start = e.target.selectionStart;
   e.target.value = e.target.value.toUpperCase();
-  e.target.setSelectionRange(start,start);
 });
 
-/* ================= HELPERS ================= */
-function caps(v){return v.toUpperCase();}
-function saveRepairs(){localStorage.setItem(REPAIR_KEY,JSON.stringify(repairs));}
+/* ========= SEED MODELS (ALWAYS) ========= */
+function seedModels(){
+  return {
+    "AIR ARMS":["S400","S410","S510","TX200","GALAHAD","KYMIRA","S200"],
+    "BSA":["R10","R12","ULTRA","SCORPION"],
+    "BROCOCK":["BRK GHOST","COMMANDER XR","SNIPER XR"],
+    "DAYSTATE":["DELTA WOLF","RED WOLF","ALPHA WOLF","BLACKWOLF"],
+    "WEIHRAUCH":["HW100","HW110","HW97","HW95"],
+    "RAW":["HM1000X"],
+    "REXIMEX":["THRONE"],
+    "AIRMAKS":["KRAKEN","PRIME"]
+  };
+}
 
-/* ================= NAV ================= */
+/* ========= LOAD DATA ========= */
+let makeModels = JSON.parse(localStorage.getItem(MODEL_KEY));
+if(!makeModels){
+  makeModels = seedModels();
+  localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));
+}
+let repairs = JSON.parse(localStorage.getItem(REPAIR_KEY)||"[]");
+
+/* ========= NAV ========= */
 function showHome(){home.style.display="block";book.style.display="none";render();}
 function showBook(){home.style.display="none";book.style.display="block";}
 
-/* ================= DROPDOWNS ================= */
+/* ========= DROPDOWNS ========= */
 function populateMakes(){
   make.innerHTML="";
   Object.keys(makeModels).sort().forEach(m=>{
-    const o=document.createElement("option");o.textContent=m;make.appendChild(o);
+    make.add(new Option(m,m));
   });
   populateModels();
 }
 function populateModels(){
   model.innerHTML="";
-  makeModels[make.value].forEach(m=>{
-    const o=document.createElement("option");o.textContent=m;model.appendChild(o);
+  (makeModels[make.value]||[]).forEach(m=>{
+    model.add(new Option(m,m));
   });
 }
 make.onchange=populateModels;
 
-make.ondblclick=()=>{
-  const m=prompt("ADD NEW MAKE");
-  if(!m)return;
-  const M=caps(m);
-  if(!makeModels[M])makeModels[M]=[];
-  localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));
-  populateMakes();make.value=M;
-};
-model.ondblclick=()=>{
-  const m=prompt("ADD NEW MODEL FOR "+make.value);
-  if(!m)return;
-  const M=caps(m);
-  makeModels[make.value].push(M);
-  localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));
-  populateModels();model.value=M;
-};
-
-/* ================= SAVE ================= */
+/* ========= SAVE ========= */
 function saveRepair(){
   repairs.push({
     make:make.value,
     model:model.value,
     calibre:calibre.value,
-    serial:caps(serial.value),
-    customer:caps(customer.value),
-    fault:caps(fault.value),
+    serial:serial.value.toUpperCase(),
+    customer:customer.value.toUpperCase(),
+    fault:fault.value.toUpperCase(),
     status:"BOOKED IN",
     open:false
   });
-  saveRepairs();
+  localStorage.setItem(REPAIR_KEY,JSON.stringify(repairs));
   showHome();
 }
 
-/* ================= WORKFLOW ================= */
+/* ========= WORKFLOW ========= */
 function toggleWorkflow(i){
   repairs[i].open=!repairs[i].open;
-  saveRepairs();render();
+  localStorage.setItem(REPAIR_KEY,JSON.stringify(repairs));
+  render();
 }
 function setStatus(i,s){
   repairs[i].status=s;
-  saveRepairs();render();
+  localStorage.setItem(REPAIR_KEY,JSON.stringify(repairs));
+  render();
 }
 
-/* ================= RENDER ================= */
+/* ========= RENDER ========= */
 function render(){
   list.innerHTML="";
   repairs.forEach((r,i)=>{
     const d=document.createElement("div");
     d.className="repair";
     d.innerHTML=`
-      <strong>${r.serial}</strong>
+      <strong>${r.serial}</strong><br>
       ${r.make} ${r.model}
       <div class="status-chip">${r.status}</div>
-      <div class="workflow ${r.open?'active':''}">
-        <div class="workflow-grid">
-          ${STATUSES.map(s=>`
-            <button class="${r.status===s?'active':''}" onclick="setStatus(${i},'${s}')">${s}</button>
-          `).join("")}
-        </div>
-      </div>
     `;
     d.onclick=()=>toggleWorkflow(i);
     list.appendChild(d);
@@ -208,7 +185,7 @@ function render(){
   count.textContent=repairs.length+" REPAIRS";
 }
 
-/* ================= INIT ================= */
+/* ========= INIT ========= */
 populateMakes();
 showHome();
 </script>
