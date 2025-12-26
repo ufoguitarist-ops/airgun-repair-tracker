@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Airgun Repair Tracker</title>
 
 <style>
-/* ================= CORE THEME ================= */
+/* ================= THEME ================= */
 :root{
   --bg:#f2f3f5;
   --card:#ffffff;
@@ -20,7 +19,7 @@
 body{
   margin:0;
   background:var(--bg);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
   color:var(--text);
 }
 
@@ -31,6 +30,7 @@ header{
   border-bottom:1px solid var(--border);
 }
 
+/* ================= PAGE ================= */
 .page{
   padding:16px;
   padding-bottom:90px;
@@ -59,11 +59,20 @@ label{
   margin-bottom:18px;
 }
 
+label small{
+  font-size:11px;
+  font-weight:400;
+}
+
 input,select,textarea{
   padding:12px;
   border-radius:12px;
   border:1px solid var(--border);
   font-size:15px;
+}
+
+textarea{
+  resize:vertical;
 }
 
 button.primary{
@@ -116,7 +125,7 @@ nav button{
 
 <header>Airgun Repair Tracker</header>
 
-<!-- HOME -->
+<!-- ================= HOME ================= -->
 <div class="page" id="home">
   <div class="card">
     <h2>REPAIRS</h2>
@@ -125,7 +134,7 @@ nav button{
   </div>
 </div>
 
-<!-- BOOK -->
+<!-- ================= BOOK ================= -->
 <div class="page" id="book" style="display:none;">
   <div class="card">
 
@@ -133,12 +142,14 @@ nav button{
 
     <label>
       MAKE
-      <input id="make">
+      <select id="make"></select>
+      <small>Double-tap to add new make</small>
     </label>
 
     <label>
       MODEL
-      <input id="model">
+      <select id="model"></select>
+      <small>Double-tap to add new model</small>
     </label>
 
     <label>
@@ -166,7 +177,7 @@ nav button{
       <textarea id="fault"></textarea>
     </label>
 
-    <button class="primary" onclick="save()">BOOK IN REPAIR</button>
+    <button class="primary" onclick="saveRepair()">BOOK IN REPAIR</button>
 
   </div>
 </div>
@@ -177,9 +188,29 @@ nav button{
 </nav>
 
 <script>
-const DB_KEY="repairs_single_file";
-let repairs=JSON.parse(localStorage.getItem(DB_KEY)||"[]");
+/* ================= STORAGE ================= */
+const REPAIR_KEY = "repairs_db";
+const MODEL_KEY = "make_model_db";
 
+let repairs = JSON.parse(localStorage.getItem(REPAIR_KEY) || "[]");
+let makeModels = JSON.parse(localStorage.getItem(MODEL_KEY) || "{}");
+
+/* ================= DEFAULT SEED ================= */
+if (Object.keys(makeModels).length === 0) {
+  makeModels = {
+    "AIR ARMS": ["S410", "S510", "GALAHAD"],
+    "BSA": ["R10", "ULTRA"],
+    "DAYSTATE": ["RED WOLF", "DELTA WOLF"]
+  };
+  saveModels();
+}
+
+/* ================= HELPERS ================= */
+function caps(v){ return v.toUpperCase(); }
+function saveRepairs(){ localStorage.setItem(REPAIR_KEY, JSON.stringify(repairs)); }
+function saveModels(){ localStorage.setItem(MODEL_KEY, JSON.stringify(makeModels)); }
+
+/* ================= NAV ================= */
 function showHome(){
   home.style.display="block";
   book.style.display="none";
@@ -190,20 +221,65 @@ function showBook(){
   book.style.display="block";
 }
 
-function save(){
-  repairs.push({
-    make:make.value.toUpperCase(),
-    model:model.value.toUpperCase(),
-    calibre:calibre.value,
-    serial:serial.value.toUpperCase(),
-    customer:customer.value.toUpperCase(),
-    fault:fault.value.toUpperCase(),
-    status:"BOOKED IN"
+/* ================= DROPDOWNS ================= */
+function populateMakes(){
+  make.innerHTML="";
+  Object.keys(makeModels).forEach(m=>{
+    const o=document.createElement("option");
+    o.textContent=m;
+    make.appendChild(o);
   });
-  localStorage.setItem(DB_KEY,JSON.stringify(repairs));
+  populateModels();
+}
+
+function populateModels(){
+  model.innerHTML="";
+  (makeModels[make.value]||[]).forEach(m=>{
+    const o=document.createElement("option");
+    o.textContent=m;
+    model.appendChild(o);
+  });
+}
+
+make.onchange = populateModels;
+
+/* ================= ADD MAKE / MODEL ================= */
+make.ondblclick = ()=>{
+  const m = prompt("ADD NEW MAKE");
+  if(!m) return;
+  const M = caps(m);
+  if(!makeModels[M]) makeModels[M]=[];
+  saveModels();
+  populateMakes();
+  make.value=M;
+};
+
+model.ondblclick = ()=>{
+  const m = prompt("ADD NEW MODEL FOR " + make.value);
+  if(!m) return;
+  const M = caps(m);
+  makeModels[make.value].push(M);
+  saveModels();
+  populateModels();
+  model.value=M;
+};
+
+/* ================= SAVE ================= */
+function saveRepair(){
+  repairs.push({
+    make: make.value,
+    model: model.value,
+    calibre: calibre.value,
+    serial: caps(serial.value),
+    customer: caps(customer.value),
+    fault: caps(fault.value),
+    status: "BOOKED IN"
+  });
+  saveRepairs();
   showHome();
 }
 
+/* ================= LIST ================= */
 function render(){
   list.innerHTML="";
   repairs.forEach(r=>{
@@ -216,9 +292,11 @@ function render(){
     `;
     list.appendChild(d);
   });
-  count.textContent=repairs.length+" REPAIRS";
+  count.textContent = repairs.length + " REPAIRS";
 }
 
+/* ================= INIT ================= */
+populateMakes();
 showHome();
 </script>
 
