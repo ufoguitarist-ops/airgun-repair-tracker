@@ -52,7 +52,72 @@
     "S200",
     "S200 WAL",
     "S200 HFT",
-    "TX200 HC WAL"
+    "TX200 HC WAL",
+    "TX200 HC ULT/SPR BLK BEECH",
+    "TX200 HC ULT/SPR LAM"
+  ],
+  "BSA": [
+    "BUCCANEER",
+    "BUCCANEER SE",
+    "GOLD STAR",
+    "LIGHTNING",
+    "R-10",
+    "R-10 SE",
+    "R-10 TH",
+    "R-10 TAC",
+    "R10 SE SUPER CARBINE WALNUT",
+    "R10 SE WALNUT",
+    "R-12 CLX PRO GREEN LAM CB",
+    "R-12 CLX PRO LAM CB",
+    "R-12 CLX PRO WAL CB",
+    "R-12 K CLX WAL",
+    "R-12 K SLX WAL",
+    "R-12 SE WAL",
+    "R-12 SLX WAL",
+    "SCORPION TS TAC",
+    "ULTRA",
+    "ULTRA CLX SL",
+    "ULTRA SE",
+    "ULTRA TS TAC",
+    "R-10 SE SUPER CARBINE THUMBHOLE",
+    "R-10 THUMBHOLE",
+    "R-12 K",
+    "R-12 SE",
+    "R-12 SLX",
+    "R-12 CLX",
+    "SCORPION SE",
+    "SCORPION"
+  ],
+  "BROCOCK": [
+    "BRK GHOST",
+    "BRK GHOST SILVER",
+    "BRK GHOST PLUS",
+    "BRK GHOST PLUS SILVER",
+    "BRK GHOST PLUS W/R LE",
+    "BRK GHOST ZERO",
+    "BRK PATHFINDER",
+    "BRK PATHFINDER O.D. GREEN",
+    "COMMANDER XR",
+    "COMMANDER XR H/LITE SYN",
+    "COMMANDER XR H/LITE CERAKOTE",
+    "CONCEPT XR",
+    "RANGER XR",
+    "SNIPER XR",
+    "SNIPER XR H/LITE SYN",
+    "SNIPER XR H/LITE LAM",
+    "SNIPER XR H/LITE SAFARI",
+    "SNIPER XR H/LITE SAHARA",
+    "COMP SNIPER XR SYN",
+    "COMP SNIPER XR SOFT TOUCH"
+  ],
+  "CROSMAN": [
+    "2240",
+    "COPPERHEAD 900",
+    "PHANTOM",
+    "VIGILANTE",
+    "RATTLER",
+    "PFAM9B",
+    "1077"
   ],
   "DAYSTATE": [
     "DELTA WOLF",
@@ -70,6 +135,14 @@
     "BLACKWOLF R B WAL",
     "BLACKWOLF R B TAC",
     "BLACKWOLF R C TAC"
+  ],
+  "GAMO": [
+    "PHOX"
+  ],
+  "KRAL": [
+    "NP-01",
+    "NP-02",
+    "NP-03"
   ],
   "WEIHRAUCH": [
     "HW100",
@@ -105,5 +178,45 @@
     "HW95K ADJ",
     "HW45 BLACK STAR",
     "HW45 SILVER STAR"
+  ],
+  "REXIMEX": [
+    "THRONE"
+  ],
+  "PISTOLS": [
+    "AIRBUG",
+    "AIRTAC",
+    "CP2",
+    "ZORAKI"
+  ],
+  "RAW": [
+    "HM1000X",
+    "HM1000X LRT"
+  ],
+  "DIANA": [
+    "DIANA 48"
+  ],
+  "NORICA": [
+    "ATLANTA",
+    "OMNIA"
+  ],
+  "STOEGER": [
+    "X10",
+    "X20"
+  ],
+  "UMAREX": [
+    "NOTOS"
+  ],
+  "WALTHER": [
+    "REIGN"
+  ],
+  "HATSAN": [
+    "JET 1",
+    "JET 2",
+    "MOD 95"
+  ],
+  "AIRMAKS": [
+    "ARMS PRIME 1",
+    "KRAKEN",
+    "KRAKEN X"
   ]
 }
