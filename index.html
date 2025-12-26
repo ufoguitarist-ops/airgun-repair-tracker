@@ -67,13 +67,24 @@ nav button{border:none;background:none;font-size:14px;}
 
     <label>CALIBRE
       <select id="calibre">
-        <option>.177</option><option>.20</option><option>.22</option><option>.25</option>
+        <option>.177</option>
+        <option>.20</option>
+        <option>.22</option>
+        <option>.25</option>
       </select>
     </label>
 
-    <label>SERIAL NUMBER <input id="serial"></label>
-    <label>CUSTOMER NAME <input id="customer"></label>
-    <label>FAULT <textarea id="fault"></textarea></label>
+    <label>SERIAL NUMBER
+      <input id="serial" data-cap>
+    </label>
+
+    <label>CUSTOMER NAME
+      <input id="customer" data-cap>
+    </label>
+
+    <label>FAULT
+      <textarea id="fault" data-cap></textarea>
+    </label>
 
     <button class="primary" onclick="saveRepair()">BOOK IN REPAIR</button>
   </div>
@@ -98,6 +109,14 @@ const STATUSES=[
 let makeModels = JSON.parse(localStorage.getItem(MODEL_KEY));
 let repairs = JSON.parse(localStorage.getItem(REPAIR_KEY)||"[]");
 
+/* ================= AUTO CAPITALS ================= */
+document.addEventListener("input", e=>{
+  if(!e.target.dataset.cap) return;
+  const start = e.target.selectionStart;
+  e.target.value = e.target.value.toUpperCase();
+  e.target.setSelectionRange(start,start);
+});
+
 /* ================= HELPERS ================= */
 function caps(v){return v.toUpperCase();}
 function saveRepairs(){localStorage.setItem(REPAIR_KEY,JSON.stringify(repairs));}
@@ -121,13 +140,38 @@ function populateModels(){
   });
 }
 make.onchange=populateModels;
-make.ondblclick=()=>{const m=prompt("ADD NEW MAKE");if(!m)return;const M=caps(m);if(!makeModels[M])makeModels[M]=[];localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));populateMakes();make.value=M;}
-model.ondblclick=()=>{const m=prompt("ADD NEW MODEL FOR "+make.value);if(!m)return;const M=caps(m);makeModels[make.value].push(M);localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));populateModels();model.value=M;}
+
+make.ondblclick=()=>{
+  const m=prompt("ADD NEW MAKE");
+  if(!m)return;
+  const M=caps(m);
+  if(!makeModels[M])makeModels[M]=[];
+  localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));
+  populateMakes();make.value=M;
+};
+model.ondblclick=()=>{
+  const m=prompt("ADD NEW MODEL FOR "+make.value);
+  if(!m)return;
+  const M=caps(m);
+  makeModels[make.value].push(M);
+  localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));
+  populateModels();model.value=M;
+};
 
 /* ================= SAVE ================= */
 function saveRepair(){
-  repairs.push({make:make.value,model:model.value,calibre:calibre.value,serial:caps(serial.value),customer:caps(customer.value),fault:caps(fault.value),status:"BOOKED IN",open:false});
-  saveRepairs();showHome();
+  repairs.push({
+    make:make.value,
+    model:model.value,
+    calibre:calibre.value,
+    serial:caps(serial.value),
+    customer:caps(customer.value),
+    fault:caps(fault.value),
+    status:"BOOKED IN",
+    open:false
+  });
+  saveRepairs();
+  showHome();
 }
 
 /* ================= WORKFLOW ================= */
