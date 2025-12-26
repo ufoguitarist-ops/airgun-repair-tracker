@@ -1,1 +1,180 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Airgun Repair Tracker</title>
+  <meta name="theme-color" content="#0f1318" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="assets/print.css" />
+  <link rel="manifest" href="manifest.webmanifest" />
+</head>
+<body>
 
+<div class="container">
+
+  <div class="topbar no-print">
+    <div class="brand">
+      <div style="font-size:20px;">🛠️</div>
+      <div>Airgun Repair Tracker</div>
+      <div class="badge">Demo</div>
+    </div>
+    <button class="iconbtn" id="themeBtn">🌙</button>
+  </div>
+
+  <!-- HOME -->
+  <section id="home" class="page">
+    <div class="card hero">
+      <div class="h1">Premium Workshop Repair System</div>
+      <p class="p">Book in repairs, scan QR tickets, update statuses and print labels fast.</p>
+      <div class="small" id="homeCount"></div>
+    </div>
+
+    <div class="actions">
+      <a class="card action" href="#book">
+        <div class="left">
+          <div style="font-size:24px;">🧾</div>
+          <div>
+            <div class="title">Book In Repair</div>
+            <div class="sub">Create booking & QR</div>
+          </div>
+        </div>
+        <div class="pill">Open</div>
+      </a>
+
+      <a class="card action" href="#scan">
+        <div class="left">
+          <div style="font-size:24px;">📷</div>
+          <div>
+            <div class="title">Scan QR</div>
+            <div class="sub">Open repair instantly</div>
+          </div>
+        </div>
+        <div class="pill">Scan</div>
+      </a>
+
+      <a class="card action" href="#search">
+        <div class="left">
+          <div style="font-size:24px;">🔎</div>
+          <div>
+            <div class="title">Search Repairs</div>
+            <div class="sub">Serial / Name / Phone</div>
+          </div>
+        </div>
+        <div class="pill">Find</div>
+      </a>
+
+      <a class="card action" href="#settings">
+        <div class="left">
+          <div style="font-size:24px;">⚙️</div>
+          <div>
+            <div class="title">Settings</div>
+            <div class="sub">Demo controls</div>
+          </div>
+        </div>
+        <div class="pill">Manage</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- BOOK -->
+  <section id="book" class="page" style="display:none;">
+    <div class="card hero">
+      <div class="h1">Book In Repair</div>
+      <p class="p">Auto capitals enabled (email excluded).</p>
+    </div>
+
+    <form id="bookForm" class="card pad" autocomplete="off">
+
+      <div class="field">
+        <label>ITEM TYPE</label>
+        <select id="itemType">
+          <option value="RIFLE">AIR RIFLE</option>
+          <option value="PISTOL">AIR PISTOL</option>
+          <option value="OTHER">OTHER ITEM</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>MAKE</label>
+        <select id="makeId"></select>
+      </div>
+
+      <div class="field">
+        <label>MODEL</label>
+        <select id="modelId"></select>
+      </div>
+
+      <div class="field">
+        <label>CALIBRE</label>
+        <input id="calibre" data-cap="calibre" />
+      </div>
+
+      <div class="field">
+        <label>SERIAL NUMBER</label>
+        <input id="serial" data-cap="serial" class="mono" />
+      </div>
+
+      <div class="field">
+        <label>CUSTOMER NAME</label>
+        <input id="customerName" data-cap="customerName" />
+      </div>
+
+      <div class="field">
+        <label>PHONE</label>
+        <input id="phone" data-cap="phone" />
+      </div>
+
+      <div class="field">
+        <label>EMAIL (lowercase)</label>
+        <input id="email" data-cap="email" />
+      </div>
+
+      <div class="field">
+        <label>ADDRESS</label>
+        <textarea id="address" data-cap="address"></textarea>
+      </div>
+
+      <div class="field">
+        <label>FAULT</label>
+        <textarea id="fault" data-cap="fault"></textarea>
+      </div>
+
+      <div class="field">
+        <label>FREE OF CHARGE (WARRANTY)</label>
+        <input type="checkbox" id="foc" />
+      </div>
+
+      <button id="saveBookingBtn" class="btn primary">💾 Save & Generate QR</button>
+
+    </form>
+  </section>
+
+  <!-- PLACEHOLDERS (filled by JS) -->
+  <section id="scan" class="page" style="display:none;"></section>
+  <section id="search" class="page" style="display:none;"></section>
+  <section id="repair" class="page" style="display:none;"></section>
+  <section id="label" class="page" style="display:none;"></section>
+  <section id="receipt" class="page" style="display:none;"></section>
+  <section id="settings" class="page" style="display:none;"></section>
+
+</div>
+
+<div class="footerbar no-print">
+  <div class="wrap">
+    <button class="iconbtn" id="toHome">🏠</button>
+    <button class="iconbtn" id="toBook">🧾</button>
+    <button class="iconbtn" id="toScan">📷</button>
+    <button class="iconbtn" id="toSearch">🔎</button>
+    <button class="iconbtn" id="toSettings">⚙️</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.10/minified/html5-qrcode.min.js"></script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>
