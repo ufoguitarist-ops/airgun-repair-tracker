@@ -16,11 +16,13 @@ function initTheme(){
   document.documentElement.setAttribute("data-theme", t);
   $("#themeBtn").textContent = t === "dark" ? "🌙" : "☀️";
 }
+
 $("#themeBtn").onclick = () => {
-  const t = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", t);
-  localStorage.setItem(THEME_KEY, t);
-  $("#themeBtn").textContent = t === "dark" ? "🌙" : "☀️";
+  const current = document.documentElement.getAttribute("data-theme") || "dark";
+  const next = current === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem(THEME_KEY, next);
+  $("#themeBtn").textContent = next === "dark" ? "🌙" : "☀️";
 };
 
 /* ----------------------------
@@ -37,9 +39,11 @@ function loadDB(){
     repairs:[]
   };
 }
+
 function saveDB(db){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
 }
+
 let DB = loadDB();
 
 /* ----------------------------
@@ -48,6 +52,7 @@ let DB = loadDB();
 document.addEventListener("input", e=>{
   const el = e.target;
   if(!el.dataset.cap) return;
+
   if(el.dataset.cap === "email"){
     el.value = el.value.toLowerCase();
   } else {
@@ -56,48 +61,62 @@ document.addEventListener("input", e=>{
 });
 
 /* ----------------------------
-   NAVIGATION
+   ROUTING / NAVIGATION (FIXED)
 ---------------------------- */
-function show(id){
-  document.querySelectorAll(".page").forEach(p=>p.style.display="none");
-  $(id).style.display="block";
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+  const el = document.getElementById(id);
+  if(el) el.style.display = "block";
 }
-window.onhashchange = route;
-function route(){
-  const h = location.hash || "#home";
-  show(h.replace("#",""));
-}
-route();
 
-$("#toHome").onclick=()=>location.hash="#home";
-$("#toBook").onclick=()=>location.hash="#book";
+function route(){
+  const hash = location.hash.replace("#","") || "home";
+  showPage(hash);
+}
+
+window.addEventListener("hashchange", route);
+
+/* Bottom navigation */
+$("#toHome").onclick = () => location.hash = "#home";
+$("#toBook").onclick = () => location.hash = "#book";
+$("#toScan").onclick = () => location.hash = "#scan";
+$("#toSearch").onclick = () => location.hash = "#search";
+$("#toSettings").onclick = () => location.hash = "#settings";
 
 /* ----------------------------
-   BOOKING FORM
+   BOOKING FORM LOGIC
 ---------------------------- */
 const makeSel = $("#makeId");
 const modelSel = $("#modelId");
 
 function loadMakes(){
-  makeSel.innerHTML = DB.makes.map(m=>`<option>${m}</option>`).join("");
+  makeSel.innerHTML = DB.makes
+    .map(m => `<option value="${m}">${m}</option>`)
+    .join("");
   loadModels();
 }
+
 function loadModels(){
-  const m = makeSel.value;
-  modelSel.innerHTML = (DB.models[m]||[]).map(x=>`<option>${x}</option>`).join("");
+  const make = makeSel.value;
+  modelSel.innerHTML = (DB.models[make] || [])
+    .map(m => `<option value="${m}">${m}</option>`)
+    .join("");
 }
-makeSel.onchange = loadModels;
 
-loadMakes();
+makeSel.addEventListener("change", loadModels);
 
-/* ----------------------------
-   SAVE BOOKING
----------------------------- */
-$("#saveBookingBtn").onclick = e=>{
+/* Save booking */
+$("#saveBookingBtn").onclick = e => {
   e.preventDefault();
 
+  const serial = $("#serial").value;
+  if(!serial){
+    showToast("Serial number required");
+    return;
+  }
+
   const repair = {
-    serial: $("#serial").value,
+    serial,
     make: makeSel.value,
     model: modelSel.value,
     calibre: $("#calibre").value,
@@ -107,7 +126,7 @@ $("#saveBookingBtn").onclick = e=>{
     address: $("#address").value,
     fault: $("#fault").value,
     foc: $("#foc").checked,
-    status:"BOOKED IN",
+    status: "BOOKED IN",
     created: new Date().toISOString()
   };
 
@@ -116,7 +135,18 @@ $("#saveBookingBtn").onclick = e=>{
 
   showToast("Repair booked in");
   $("#bookForm").reset();
+  updateHomeCount();
 };
+
+/* ----------------------------
+   HOME COUNT
+---------------------------- */
+function updateHomeCount(){
+  const el = $("#homeCount");
+  if(el){
+    el.textContent = `${DB.repairs.length} repairs in demo`;
+  }
+}
 
 /* ----------------------------
    TOAST
@@ -125,13 +155,13 @@ function showToast(msg){
   const t = $("#toast");
   t.textContent = msg;
   t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),2000);
+  setTimeout(() => t.classList.remove("show"), 2000);
 }
 
 /* ----------------------------
-   HOME COUNT
+   INIT
 ---------------------------- */
-function updateHome(){
-  $("#homeCount").textContent = DB.repairs.length + " repairs in demo";
-}
-updateHome();
+initTheme();
+loadMakes();
+route();
+updateHomeCount();
