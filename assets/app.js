@@ -1,11 +1,16 @@
 /* ============================
    AIRGUN REPAIR TRACKER – DEMO
-   DROPDOWNS SEEDED FROM EXCEL
-   (Authoritative seed + keeps your custom additions)
+   DROPDOWNS FROM YOUR EXCEL (EXACT)
+   Row 1 = Make headers
+   Row 2+ = Models under each make
+   - ALL CAPS applied
+   - No guessing / no invented models
+   - Preserves Excel order
+   - Double-tap add Make/Model kept (saved as custom additions)
    ============================ */
 
 const $ = q => document.querySelector(q);
-const STORAGE_KEY = "airgun_repairs_demo";   // keep same key (preserve repairs)
+const STORAGE_KEY = "airgun_repairs_demo";
 const THEME_KEY = "airgun_theme";
 
 /* ----------------------------
@@ -29,65 +34,255 @@ if (themeBtn){
 }
 
 /* ----------------------------
-   EXCEL SEED (Row 1 = Makes, Row 2+ = Models)
-   EVERYTHING IS UPPERCASE
+   YOUR EXCEL LIST (EXACT CONTENT, CAPS, ORDER PRESERVED)
 ---------------------------- */
 const EXCEL_MODELS = {
-  "AIR ARMS": ["GALAHAD K R WAL", "GALAHAD K R TACTICAL", "GALAHAD K R WAL SOFT TOUCH", "KYMIRA", "KYMIRA LAM", "KYMIRA WAL", "PRO SPORT", "PRO SPORT WAL", "S200", "S200 HFT", "S300", "S400", "S400 S/L HUNT", "S400 S/L TRAD", "S400 THW", "S400 WAL", "S400K", "S400K S/L HUNT", "S400K S/L TRAD", "S410", "S410 S/L HUNT", "S410 S/L TRAD", "S410 TDR WALNUT", "S410 WAL", "S410K", "S410K S/L HUNT", "S410K S/L TRAD", "S410K TDR WALNUT", "S410K WAL", "S500", "S510", "S510 R", "S510 R TACTICAL", "S510 R XS", "S510 R XS S/L", "S510 R XS TACTICAL", "S510 S/L", "S510 S/L TRAD", "S510 S/L HUNT", "S510 TACTICAL", "S510 WAL", "S510 THW", "S510 XS", "S510 XS S/L", "S510 XS TACTICAL", "TX200", "TX200 HC", "TX200 MK3", "TX200 WAL", "ULTIMATE SPORTER", "HFT 500", "EVOL", "EVOL MINI", "EVOL TAC"],
-  "BSA": ["BUCCANEER", "BUCCANEER SE", "GOLD STAR", "LIGHTNING", "R-10", "R-10 SE", "R-10 TH", "R-10 TAC", "R-10 SE SUPER CARBINE WALNUT", "R-10 SE WALNUT", "R-12", "R-12 K", "R-12 SE", "R-12 SLX", "R-12 CLX", "R-12 CLX PRO GREEN LAM CB", "R-12 CLX PRO LAM CB", "R-12 CLX PRO WAL CB", "R-12 K CLX WAL", "R-12 K SLX WAL", "R-12 SE WAL", "R-12 SLX WAL", "SCORPION", "SCORPION SE", "SCORPION TS", "SCORPION TS TAC", "ULTRA", "ULTRA CLX SL", "ULTRA SE", "ULTRA TS TAC"],
-  "BROCOCK": ["BRK GHOST", "BRK GHOST SILVER", "BRK GHOST PLUS", "BRK GHOST PLUS SILVER", "BRK GHOST PLUS W/R LE", "BRK GHOST ZERO", "BRK PATHFINDER", "BRK PATHFINDER O.D. GREEN", "COMMANDER XR", "COMMANDER XR H/LITE SYN", "COMMANDER XR H/LITE CERAKOTE", "CONCEPT XR", "RANGER XR", "SNIPER XR", "SNIPER XR H/LITE SYN", "SNIPER XR H/LITE LAM", "SNIPER XR H/LITE SAFARI", "SNIPER XR H/LITE SAHARA", "COMP SNIPER XR SYN", "COMP SNIPER XR SOFT TOUCH"],
-  "CROSMAN": ["2240", "COPPERHEAD 900", "PHANTOM", "VIGILANTE", "RATTLER", "PFAM9B", "1077"],
-  "DAYSTATE": ["DELTA WOLF", "DELTA WOLF BRONZE", "DELTA WOLF BLACK", "DELTA WOLF BLUE", "HUNTSMAN", "HUNTSMAN CLASSIC", "HUNTSMAN REGAL", "HUNTSMAN REVERB", "RED WOLF", "RED WOLF HI-LITE", "RED WOLF WAL", "WOLVERINE", "WOLVERINE R", "WOLVERINE 2", "WOLVERINE TYPE B", "WOLVERINE TYPE C", "ALPHA WOLF", "ALPHA WOLF BRONZE", "PULSAR", "PULSAR HP", "WOLVERINE BRONZE", "RED WOLF BRONZE", "HUNTSMAN HFT", "HUNTSMAN 1000", "DELTA WOLF TACTICAL", "RED WOLF TACTICAL", "WOLVERINE TACTICAL", "HUNTSMAN TACTICAL", "RED WOLF BLACK", "DELTA WOLF GREY"],
-  "GAMO": ["PHOX", "PHOX MK2", "PHOX MK3", "SWARM", "SWARM MAGNUM", "REPLAY 10", "COYOTE", "URBAN"],
-  "KRAL": ["NP-01", "NP-02", "NP-03", "PUNCHER", "PUNCHER BREAKER", "PUNCHER EMPIRE", "PUNCHER JUMBO", "PUNCHER MAXI"],
-  "WEIHRAUCH": ["HW 110 TAC", "HW 110 K TAC", "HW 110 KT LAM", "HW 110 T LAM", "HW 100 BP", "HW 100 BPK", "HW 100 KS", "HW 100 KT", "HW 100 KT LAM", "HW 100 S", "HW 100 T", "HW 99S", "HW 97K", "HW 97KT", "HW 97KT TAC", "HW 77K", "HW 77KT", "HW 77KT TAC", "HW 95K", "HW 95K LAM", "HW 80", "HW 98", "HW 30", "HW 35", "HW 45 BLACK STAR", "HW 45 SILVER STAR", "HW 44", "HW 40", "HW 30 S KIT", "HW 100T BLK SYN FSB", "HW 100 KT GREY LAM SILVER", "HW 45", "HW 100 T LAM", "HW 30 JUNIOR FO-SIGHTS", "HW 97K BLUE LAM", "HW 100X-KT", "HW 100X-KT LAM ADJ", "HW 100X-S LAM ADJ", "HW 100X-T", "HW 95K ADJ"],
-  "REXIMEX": ["THRONE", "MYTH", "DAYSTAR", "TORNADO", "PRESTIGE", "RPA", "ZONE"],
-  "PISTOLS": ["CP2", "CP1", "ZORAKI", "AIRTAC", "AIRBUG", "PX4", "1911", "P226"],
-  "RAW": ["HM1000X", "HM1000X LRT", "TM1000", "SK1000"],
-  "DIANA": ["DIANA 48", "DIANA 34", "DIANA 350", "DIANA 54"],
-  "NORICA": ["ATLANTA", "OMNIA", "DRAGON", "STORM"],
-  "STOEGER": ["X10", "X20", "RX20", "ATAC"],
-  "UMAREX": ["NOTOS", "ORIGIN", "GAUNTLET", "SYNERGYS"],
-  "WALTHER": ["REIGN", "ROTEX", "DOMINATOR", "LGU"],
-  "HATSAN": ["JET 1", "JET 2", "MOD 95", "MOD 125", "FLASH", "BULLBOSS"],
-  "AIRMAKS": ["KRAKEN", "KRAKEN X", "KRAKEN SHORT", "KRAKEN TACTICAL"]
+  "AIR ARMS": [
+    "GALAHAD K R WAL",
+    "GALAHAD K R TACTICAL",
+    "HFT 500",
+    "KYMIRA LAM",
+    "PRO SPORT",
+    "PRO SPORT WAL",
+    "S400",
+    "S400 S/L HUNT",
+    "S400 S/L TRAD",
+    "S400 THW",
+    "S400 WAL",
+    "S400K",
+    "S400K S/L HUNT",
+    "S400K S/L TRAD",
+    "S410",
+    "S410 S/L HUNT",
+    "S410 S/L TRAD",
+    "S410 TDR WALNUT",
+    "S410 WAL",
+    "S410K",
+    "S410K S/L HUNT",
+    "S410K S/L TRAD",
+    "S410K TDR WALNUT",
+    "S410K WAL",
+    "S500",
+    "S500 WAL",
+    "S500 THW",
+    "S500 S/L TRAD",
+    "S500 S/L HUNT",
+    "S510",
+    "S510 R",
+    "S510 R TACTICAL",
+    "S510 R XS",
+    "S510 R XS S/L",
+    "S510 R XS TACTICAL",
+    "S510 WAL",
+    "S510 THW",
+    "S510 S/L TRAD",
+    "S510 S/L HUNT",
+    "S510 XS",
+    "S510 XS S/L",
+    "S510 XS TACTICAL",
+    "S510 TACTICAL",
+    "TX200",
+    "TX200 HC",
+    "TX200 MK3",
+    "TX200 WAL",
+    "ULTIMATE SPORTER WAL",
+    "HFT 500 BRONZE",
+    "S200",
+    "S200 WAL",
+    "S200 HFT",
+    "TX200 HC WAL"
+  ],
+  "BSA": [
+    "BUCCANEER",
+    "BUCCANEER SE",
+    "GOLD STAR",
+    "LIGHTNING",
+    "R-10",
+    "R-10 SE",
+    "R-10 TH",
+    "R-10 TAC",
+    "R10 SE SUPER CARBINE WALNUT",
+    "R10 SE WALNUT",
+    "R-12 CLX PRO GREEN LAM CB",
+    "R-12 CLX PRO LAM CB",
+    "R-12 CLX PRO WAL CB",
+    "R-12 K CLX WAL",
+    "R-12 K SLX WAL",
+    "R-12 SE WAL",
+    "R-12 SLX WAL",
+    "SCORPION TS TAC",
+    "ULTRA",
+    "ULTRA CLX SL",
+    "ULTRA SE",
+    "ULTRA TS TAC",
+    "R-10 SE SUPER CARBINE THUMBHOLE",
+    "R-10 THUMBHOLE",
+    "R-12 K",
+    "R-12 SE",
+    "R-12 SLX",
+    "R-12 CLX",
+    "SCORPION SE",
+    "SCORPION"
+  ],
+  "BROCOCK": [
+    "BRK GHOST",
+    "BRK GHOST SILVER",
+    "BRK GHOST PLUS",
+    "BRK GHOST PLUS SILVER",
+    "BRK GHOST PLUS W/R LE",
+    "BRK GHOST ZERO",
+    "BRK PATHFINDER",
+    "BRK PATHFINDER O.D. GREEN",
+    "COMMANDER XR",
+    "COMMANDER XR H/LITE SYN",
+    "COMMANDER XR H/LITE CERAKOTE",
+    "CONCEPT XR",
+    "RANGER XR",
+    "SNIPER XR",
+    "SNIPER XR H/LITE SYN",
+    "SNIPER XR H/LITE LAM",
+    "SNIPER XR H/LITE SAFARI",
+    "SNIPER XR H/LITE SAHARA",
+    "COMP SNIPER XR SYN",
+    "COMP SNIPER XR SOFT TOUCH"
+  ],
+  "CROSMAN": [
+    "2240",
+    "COPPERHEAD 900",
+    "PHANTOM",
+    "VIGILANTE",
+    "RATTLER",
+    "PFAM9B",
+    "1077"
+  ],
+  "DAYSTATE": [
+    "DELTA WOLF",
+    "DELTA WOLF BRONZE",
+    "HUNTSMAN",
+    "HUNTSMAN CLASSIC",
+    "RED WOLF",
+    "RED WOLF HI-LITE",
+    "WOLVERINE"
+  ],
+  "GAMO": [
+    "PHOX"
+  ],
+  "KRAL": [
+    "NP-01",
+    "NP-02",
+    "NP-03"
+  ],
+  "WEIHRAUCH": [
+    "HW100",
+    "HW100 BP",
+    "HW100 KT",
+    "HW100 T",
+    "HW110",
+    "HW77",
+    "HW80",
+    "HW95",
+    "HW97",
+    "HW98",
+    "HW30",
+    "HW35",
+    "HW97K",
+    "HW97KT",
+    "HW77K",
+    "HW77KT",
+    "HW95K",
+    "HW99S",
+    "HW44",
+    "HW45",
+    "HW40",
+    "HW100 S",
+    "HW100 KS",
+    "HW100T BLK SYN FSB",
+    "HW100 KT GREY LAM SILVER",
+    "HW97K BLUE LAM",
+    "HW100X-KT",
+    "HW100X-KT LAM ADJ",
+    "HW100X-S LAM ADJ",
+    "HW100X-T",
+    "HW95K ADJ",
+    "HW45 BLACK STAR",
+    "HW45 SILVER STAR"
+  ],
+  "REXIMEX": [
+    "THRONE"
+  ],
+  "PISTOLS": [
+    "AIRBUG",
+    "AIRTAC",
+    "CP2",
+    "ZORAKI"
+  ],
+  "RAW": [
+    "HM1000X",
+    "HM1000X LRT"
+  ],
+  "DIANA": [
+    "DIANA 48"
+  ],
+  "NORICA": [
+    "ATLANTA",
+    "OMNIA"
+  ],
+  "STOEGER": [
+    "X10",
+    "X20"
+  ],
+  "UMAREX": [
+    "NOTOS"
+  ],
+  "WALTHER": [
+    "REIGN"
+  ],
+  "HATSAN": [
+    "JET 1",
+    "JET 2",
+    "MOD 95"
+  ],
+  "AIRMAKS": [
+    "ARMS PRIME 1",
+    "KRAKEN",
+    "KRAKEN X"
+  ]
 };
 
 /* ----------------------------
-   DATABASE (authoritative seed for makes/models)
-   - Always starts from EXCEL_MODELS (so nothing is missing)
-   - Merges any user-added makes/models stored in db.custom
-   - Preserves repairs list
+   DB LOAD (Excel is authoritative for dropdowns)
+   - repairs are preserved
+   - custom makes/models are preserved and merged on top
 ---------------------------- */
 function saveDB(db){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
 
 function loadDB(){
   const old = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  const repairs = Array.isArray(old.repairs) ? old.repairs : [];
+  const custom = (old.custom && typeof old.custom === "object") ? old.custom : {};
 
+  // Authoritative seed (exactly your Excel)
   const db = {
     makes: Object.keys(EXCEL_MODELS),
     models: JSON.parse(JSON.stringify(EXCEL_MODELS)),
-    repairs: Array.isArray(old.repairs) ? old.repairs : [],
-    // custom format: { "MAKE": ["MODEL1","MODEL2"], ... }
-    custom: (old.custom && typeof old.custom === "object") ? old.custom : {}
+    repairs,
+    custom
   };
 
-  // Merge custom makes/models on top (without losing Excel seed)
-  for(const [make, models] of Object.entries(db.custom)){
-    const M = String(make||"").trim().toUpperCase();
+  // Merge custom additions on top (doesn't change seed, only adds)
+  for (const [make, arr] of Object.entries(custom)){
+    const M = String(make || "").trim().toUpperCase();
     if(!M) continue;
     if(!db.makes.includes(M)) db.makes.push(M);
     if(!db.models[M]) db.models[M] = [];
-    const arr = Array.isArray(models) ? models : [];
-    for(const x of arr){
-      const mm = String(x||"").trim().toUpperCase();
+    const list = Array.isArray(arr) ? arr : [];
+    for (const x of list){
+      const mm = String(x || "").trim().toUpperCase();
       if(mm && !db.models[M].includes(mm)) db.models[M].push(mm);
     }
   }
 
-  // Sort makes for nicer UX (models sorted on render)
-  db.makes.sort();
-  saveDB(db); // write back so everyone is synced
+  saveDB(db);
   return db;
 }
 
@@ -120,36 +315,28 @@ function route(){
 }
 window.addEventListener("hashchange", route);
 
-const nav = {
-  toHome: "#home",
-  toBook: "#book",
-  toScan: "#scan",
-  toSearch: "#search",
-  toSettings: "#settings"
-};
+const nav = { toHome:"#home", toBook:"#book", toScan:"#scan", toSearch:"#search", toSettings:"#settings" };
 for(const [btnId, hash] of Object.entries(nav)){
   const btn = document.getElementById(btnId);
   if(btn) btn.onclick = () => location.hash = hash;
 }
 
 /* ----------------------------
-   MAKE / MODEL UI
+   MAKE / MODEL UI (Excel order preserved)
 ---------------------------- */
 const makeSel = $("#makeId");
 const modelSel = $("#modelId");
 
 function loadMakes(){
   if(!makeSel) return;
-  makeSel.innerHTML = DB.makes
-    .map(m => `<option value="${m}">${m}</option>`)
-    .join("");
+  makeSel.innerHTML = DB.makes.map(m => `<option value="${m}">${m}</option>`).join("");
   loadModels();
 }
 
 function loadModels(){
   if(!modelSel || !makeSel) return;
   const make = makeSel.value;
-  const models = (DB.models[make] || []).slice().sort();
+  const models = (DB.models[make] || []);
   modelSel.innerHTML = models.map(m => `<option value="${m}">${m}</option>`).join("");
 }
 
@@ -198,6 +385,19 @@ if(modelSel){
 /* ----------------------------
    SAVE BOOKING (DEMO)
 ---------------------------- */
+function showToast(msg){
+  const t = $("#toast");
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+function updateHome(){
+  const el = $("#homeCount");
+  if(el) el.textContent = `${DB.repairs.length} REPAIRS IN DEMO`;
+}
+
 const saveBtn = $("#saveBookingBtn");
 if(saveBtn){
   saveBtn.onclick = (e) => {
@@ -225,29 +425,9 @@ if(saveBtn){
     DB.repairs.push(repair);
     saveDB(DB);
     showToast("REPAIR BOOKED IN");
-    const form = $("#bookForm");
-    if(form) form.reset();
+    $("#bookForm")?.reset();
     updateHome();
   };
-}
-
-/* ----------------------------
-   HOME COUNT
----------------------------- */
-function updateHome(){
-  const el = $("#homeCount");
-  if(el) el.textContent = `${DB.repairs.length} REPAIRS IN DEMO`;
-}
-
-/* ----------------------------
-   TOAST
----------------------------- */
-function showToast(msg){
-  const t = $("#toast");
-  if(!t) return;
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2000);
 }
 
 /* ----------------------------
