@@ -1,5 +1,6 @@
 /* ============================
    AIRGUN REPAIR TRACKER – DEMO
+   CSV-POPULATED MAKES & MODELS
    ============================ */
 
 const $ = q => document.querySelector(q);
@@ -23,16 +24,53 @@ $("#themeBtn").onclick = () => {
 };
 
 /* ----------------------------
+   CSV-DERIVED MASTER DATA
+---------------------------- */
+const CSV_MODELS = {
+  "AIR ARMS": [
+    "HFT 500","PRO SPORT","PRO SPORT WAL","S400","S400 S/L HUNT","S400 WAL",
+    "S400K S/L TRAD","S410","S410 S/L HUNT","S410 S/L TRAD","S410 TDR WALNUT",
+    "S410K","S410K S/L HUNT","S410K S/L TRAD","S410K TDR WALNUT",
+    "S510","S510 R TACTICAL","S510 R XS","S510 R XS S/L","S510 R XS TACTICAL",
+    "S510 S/L","S510 TACTICAL","S510 XS","S510 XS S/L","S510 XS TACTICAL",
+    "TX200","TX200 HC","TX200 MK3","TX200 WAL"
+  ],
+  "BSA": [
+    "BUCCANEER","GOLD STAR","LIGHTNING","R-10","R-10 SE","R-10 TH","R-10 TAC",
+    "R-12 CLX PRO GREEN LAM CB","R-12 CLX PRO LAM CB","R-12 CLX PRO WAL CB",
+    "R-12 K CLX WAL","R-12 K SLX WAL","R-12 SE WAL","R-12 SLX WAL",
+    "R10 SE SUPER CARBINE WALNUT","R10 SE WALNUT",
+    "SCORPION TS TAC","ULTRA","ULTRA CLX SL","ULTRA SE","ULTRA TS TAC"
+  ],
+  "BROCOCK": [
+    "COMMANDER XR","COMMANDER XR H/LITE CERAKOTE","GHOST","GHOST PLUS",
+    "RANGER XR","SNIPER XR","XR"
+  ],
+  "DAYSTATE": [
+    "DELTA WOLF","DELTA WOLF BRONZE","HUNTSMAN","HUNTSMAN CLASSIC",
+    "RED WOLF","RED WOLF HI-LITE","WOLVERINE"
+  ],
+  "FALCON": ["FN 19"],
+  "FX": ["CROWN","DREAMLINE","IMPACT"],
+  "WEIHRAUCH": ["HW100","HW97","HW110"],
+  "WEBLEY": ["MK6","MK6 CLASSIC"],
+  "CROSMAN": ["2240","COPPERHEAD 900","PHANTOM"],
+  "GAMO": ["PHOX"],
+  "REXIMEX": ["THRONE"],
+  "RWS": ["Diana 48"],
+  "SMK": ["PR900"],
+  "THEOBEN": ["RAPID"],
+  "UMAREX": ["NOTOS"],
+  "WALTHER": ["REIGN"]
+};
+
+/* ----------------------------
    DATABASE
 ---------------------------- */
 function loadDB(){
   return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-    makes: ["AIR ARMS","BSA","DAYSTATE"],
-    models: {
-      "AIR ARMS":["S410","TX200"],
-      "BSA":["R10","ULTRA"],
-      "DAYSTATE":["WOLVERINE"]
-    },
+    makes: Object.keys(CSV_MODELS),
+    models: JSON.parse(JSON.stringify(CSV_MODELS)),
     repairs:[]
   };
 }
@@ -73,13 +111,14 @@ $("#toSearch").onclick = ()=>location.hash="#search";
 $("#toSettings").onclick = ()=>location.hash="#settings";
 
 /* ----------------------------
-   MAKE / MODEL LOGIC
+   MAKE / MODEL UI
 ---------------------------- */
 const makeSel = $("#makeId");
 const modelSel = $("#modelId");
 
 function loadMakes(){
   makeSel.innerHTML = DB.makes
+    .sort()
     .map(m=>`<option value="${m}">${m}</option>`)
     .join("");
   loadModels();
@@ -87,37 +126,35 @@ function loadMakes(){
 function loadModels(){
   const make = makeSel.value;
   modelSel.innerHTML = (DB.models[make] || [])
+    .sort()
     .map(m=>`<option value="${m}">${m}</option>`)
     .join("");
 }
 makeSel.onchange = loadModels;
 
-/* Add make */
+/* Double-tap to add make */
 makeSel.ondblclick = () => {
-  const name = prompt("Add new MAKE");
-  if(!name) return;
-  const val = name.toUpperCase();
-  if(DB.makes.includes(val)) return;
-  DB.makes.push(val);
-  DB.models[val] = [];
+  const name = prompt("ADD NEW MAKE").toUpperCase();
+  if(!name || DB.makes.includes(name)) return;
+  DB.makes.push(name);
+  DB.models[name] = [];
   saveDB(DB);
   loadMakes();
-  makeSel.value = val;
+  makeSel.value = name;
 };
 
-/* Add model */
+/* Double-tap to add model */
 modelSel.ondblclick = () => {
   const make = makeSel.value;
-  if(!make) return alert("Select make first");
-  const name = prompt(`Add model for ${make}`);
+  if(!make) return;
+  const name = prompt(`ADD MODEL FOR ${make}`).toUpperCase();
   if(!name) return;
-  const val = name.toUpperCase();
   DB.models[make] = DB.models[make] || [];
-  if(DB.models[make].includes(val)) return;
-  DB.models[make].push(val);
+  if(DB.models[make].includes(name)) return;
+  DB.models[make].push(name);
   saveDB(DB);
   loadModels();
-  modelSel.value = val;
+  modelSel.value = name;
 };
 
 /* ----------------------------
@@ -125,11 +162,10 @@ modelSel.ondblclick = () => {
 ---------------------------- */
 $("#saveBookingBtn").onclick = e => {
   e.preventDefault();
-
   const serial = $("#serial").value;
   if(!serial) return showToast("Serial number required");
 
-  const repair = {
+  DB.repairs.push({
     serial,
     make: makeSel.value,
     model: modelSel.value,
@@ -142,9 +178,8 @@ $("#saveBookingBtn").onclick = e => {
     foc: $("#foc").checked,
     status: "BOOKED IN",
     created: new Date().toISOString()
-  };
+  });
 
-  DB.repairs.push(repair);
   saveDB(DB);
   showToast("Repair booked in");
   $("#bookForm").reset();
@@ -152,25 +187,10 @@ $("#saveBookingBtn").onclick = e => {
 };
 
 /* ----------------------------
-   PLACEHOLDER PAGES
----------------------------- */
-["scan","search","settings"].forEach(id=>{
-  const el = document.getElementById(id);
-  if(el){
-    el.innerHTML = `
-      <div class="card hero">
-        <div class="h1">${id.toUpperCase()}</div>
-        <p class="p">Coming next.</p>
-      </div>`;
-  }
-});
-
-/* ----------------------------
    HOME
 ---------------------------- */
 function updateHome(){
-  const el = $("#homeCount");
-  if(el) el.textContent = `${DB.repairs.length} repairs in demo`;
+  $("#homeCount").textContent = `${DB.repairs.length} repairs in demo`;
 }
 
 /* ----------------------------
