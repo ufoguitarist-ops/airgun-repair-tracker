@@ -1,1 +1,10 @@
-
+{
+  "name": "Airgun Repair Tracker",
+  "short_name": "RepairTracker",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f1318",
+  "theme_color": "#0f1318",
+  "description": "Premium mobile-first airgun repair tracking system",
+  "icons": []
+}
