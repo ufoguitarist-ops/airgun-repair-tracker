@@ -2,64 +2,43 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Airgun Repair Tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<link rel="stylesheet" href="styles.css">
 <script src="qr.js"></script>
-
-<style>
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;background:#f2f3f5}
-header{padding:14px;font-size:20px;font-weight:700;border-bottom:1px solid #ccc}
-.page{padding:16px}
-.card{background:#fff;border-radius:16px;padding:16px;max-width:520px;margin:auto}
-input{padding:12px;width:100%;border-radius:12px;border:1px solid #ccc;margin-bottom:12px}
-button{padding:14px;border-radius:14px;border:none;background:#2563eb;color:#fff;font-weight:700;width:100%}
-#qrBox{text-align:center;margin-top:20px}
-canvas{margin:auto}
-</style>
 </head>
 
 <body>
-<header>Airgun Repair Tracker</header>
+<div class="app">
 
-<div class="page">
-  <div class="card">
-    <h2>BOOK IN REPAIR</h2>
-    <input id="serial" placeholder="SERIAL NUMBER">
-    <button onclick="generate()">BOOK IN REPAIR</button>
-    <div id="qrBox"></div>
-  </div>
+<h1>Airgun Repair Tracker</h1>
+
+<form id="repairForm">
+
+<label>Serial Number</label>
+<input id="serial" required>
+
+<label>Fault</label>
+<textarea id="fault"></textarea>
+
+<label class="checkbox">
+  <input type="checkbox" id="foc">
+  Free of charge (warranty)
+</label>
+
+<!-- IMPORTANT: type="button" -->
+<button type="button" id="bookBtn">BOOK IN REPAIR</button>
+
+</form>
+
+<div id="qrWrap" class="hidden">
+  <h2>QR CODE</h2>
+  <canvas id="qr"></canvas>
 </div>
 
-<script>
-function generate(){
-  const text = serial.value.trim();
-  if(!text){ alert("Enter serial"); return; }
+</div>
 
-  const qr = qrcodegen.QrCode.encodeText(text, qrcodegen.QrCode.Ecc.LOW);
-  const size = qr.modules.length;
-  const scale = 8;
-
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = size * scale;
-  const ctx = canvas.getContext("2d");
-
-  ctx.fillStyle="#fff";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="#000";
-
-  for(let y=0;y<size;y++){
-    for(let x=0;x<size;x++){
-      if(qr.modules[y][x]){
-        ctx.fillRect(x*scale,y*scale,scale,scale);
-      }
-    }
-  }
-
-  qrBox.innerHTML="<h3>QR CODE</h3>";
-  qrBox.appendChild(canvas);
-}
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
