@@ -1,8 +1,8 @@
 const $ = q => document.querySelector(q);
-const STORAGE_KEY = "airgun_repairs_demo";
+const STORAGE_KEY = "airgun_repairs";
 const THEME_KEY = "airgun_theme";
 
-let DB = { repairs:[], custom:{} };
+let DB = { repairs:[], models:{} };
 
 /* ================= THEME ================= */
 function initTheme(){
@@ -17,26 +17,35 @@ $("#themeBtn").onclick = ()=>{
   $("#themeBtn").textContent = t==="dark"?"🌙":"☀️";
 };
 
+/* ================= NAV ================= */
+function showHome(){
+  $("#home").style.display="block";
+  $("#book").style.display="none";
+}
+function showBook(){
+  $("#home").style.display="none";
+  $("#book").style.display="block";
+}
+
 /* ================= LOAD MODELS ================= */
-async function loadExcelModels(){
-  const seed = await fetch("data/makes-models.json").then(r=>r.json());
-  const old = JSON.parse(localStorage.getItem(STORAGE_KEY))||{};
-  DB.repairs = old.repairs||[];
-  DB.custom = old.custom||{};
-  DB.models = seed;
-  DB.makes = Object.keys(seed);
+async function loadModels(){
+  DB.models = await fetch("data/makes-models.json").then(r=>r.json());
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if(saved) DB.repairs = saved.repairs || [];
   populateMakes();
   renderRepairs();
 }
 
 /* ================= DROPDOWNS ================= */
 function populateMakes(){
-  $("#makeId").innerHTML = DB.makes.map(m=>`<option>${m}</option>`).join("");
+  $("#makeId").innerHTML = Object.keys(DB.models)
+    .map(m=>`<option>${m}</option>`).join("");
   populateModels();
 }
 function populateModels(){
   const make=$("#makeId").value;
-  $("#modelId").innerHTML=(DB.models[make]||[]).map(m=>`<option>${m}</option>`).join("");
+  $("#modelId").innerHTML = (DB.models[make]||[])
+    .map(m=>`<option>${m}</option>`).join("");
 }
 $("#makeId").onchange=populateModels;
 
@@ -59,6 +68,7 @@ $("#saveBookingBtn").onclick=e=>{
   });
   localStorage.setItem(STORAGE_KEY,JSON.stringify(DB));
   showToast("REPAIR BOOKED IN");
+  showHome();
   renderRepairs();
 };
 
@@ -79,7 +89,10 @@ function renderRepairs(){
 }
 
 function changeStatus(i){
-  const s=prompt("STATUS","IN PROGRESS");
+  const s=prompt(
+    "SET STATUS\nBOOKED IN\nIN PROGRESS\nON SOAK\nWAITING FOR PARTS\nSENT AWAY\nREADY\nRETURNED",
+    DB.repairs[i].status
+  );
   if(!s)return;
   DB.repairs[i].status=s.toUpperCase();
   localStorage.setItem(STORAGE_KEY,JSON.stringify(DB));
@@ -96,4 +109,5 @@ function showToast(m){
 
 /* ================= INIT ================= */
 initTheme();
-loadExcelModels();
+showHome();
+loadModels();
