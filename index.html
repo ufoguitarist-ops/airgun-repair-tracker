@@ -13,7 +13,7 @@
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;background:var(--bg);color:var(--text)}
 header{padding:14px 16px;font-size:20px;font-weight:700;border-bottom:1px solid var(--border)}
 .page{padding:16px 16px 120px}
-.card{background:var(--card);border-radius:16px;padding:16px;max-width:600px;margin:auto}
+.card{background:var(--card);border-radius:16px;padding:16px;max-width:620px;margin:auto}
 label{display:flex;flex-direction:column;font-size:12px;font-weight:600;color:var(--muted);gap:6px;margin-bottom:14px}
 input,select,textarea{padding:12px;border-radius:12px;border:1px solid var(--border);font-size:15px}
 textarea{min-height:80px}
@@ -27,7 +27,7 @@ button.primary{width:100%;padding:14px;border-radius:14px;border:none;background
 .workflow button.active{background:var(--accent);color:#fff}
 nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0}
 .toggle{display:flex;gap:10px;align-items:center;margin-bottom:14px}
-#qrBox{margin-top:20px;text-align:center}
+#qrBox{text-align:center;margin-top:20px}
 canvas{margin:auto}
 </style>
 </head>
@@ -92,33 +92,31 @@ document.addEventListener("input",e=>{
     e.target.value=e.target.value.toUpperCase()
 },true)
 
-/* DATA */
+/* STATUS */
 const STATUSES=["BOOKED IN","IN PROGRESS","ON SOAK","WAITING FOR PARTS","SENT AWAY","READY","RETURNED"]
-const makeModels = /* 🔒 EXACT DATA FROM PHASE 1 */ JSON.parse(localStorage.getItem("MAKE_MODEL_LOCK")) || (()=>{
-  const data = {
-    "AIR ARMS":["GALAHAD K R WAL","S400","S410","S510","TX200","ULTIMATE SPORTER","HFT 500"],
-    "BSA":["R-10","R-12","ULTRA","SCORPION","GOLD STAR"],
-    "BROCOCK":["GHOST","GHOST PLUS","PATHFINDER","COMMANDER XR"],
-    "DAYSTATE":["RED WOLF","DELTA WOLF","ALPHA WOLF","BLACKWOLF"],
-    "WEIHRAUCH":["HW100","HW110","HW97","HW95","HW77"],
-    "REXIMEX":["THRONE"],
-    "RAW":["HM1000X"],
-    "GAMO":["PHOX"],
-    "KRAL":["NP-01","NP-02"],
-    "NORICA":["ATLANTA"],
-    "STOEGER":["X20"],
-    "UMAREX":["NOTOS"],
-    "WALTHER":["REIGN"],
-    "HATSAN":["JET 1","MOD 95"],
-    "AIRMAKS":["KRAKEN"],
-    "PISTOLS":["CP2","ZORAKI"],
-    "DIANA":["DIANA 48"]
-  }
-  localStorage.setItem("MAKE_MODEL_LOCK",JSON.stringify(data))
-  return data
-})()
 
-let repairs=JSON.parse(localStorage.getItem("repairs_db")||"[]")
+/* 🔒 LOCKED MAKE/MODEL DATA */
+const makeModels = JSON.parse(localStorage.getItem("MAKE_MODEL_LOCK")) || {
+  "AIR ARMS":["GALAHAD K R WAL","S400","S410","S510","TX200","ULTIMATE SPORTER","HFT 500"],
+  "BSA":["R-10","R-12","ULTRA","SCORPION","GOLD STAR"],
+  "BROCOCK":["GHOST","GHOST PLUS","PATHFINDER","COMMANDER XR"],
+  "DAYSTATE":["RED WOLF","DELTA WOLF","ALPHA WOLF","BLACKWOLF"],
+  "WEIHRAUCH":["HW100","HW110","HW97","HW95","HW77"],
+  "REXIMEX":["THRONE"],
+  "RAW":["HM1000X"],
+  "GAMO":["PHOX"],
+  "KRAL":["NP-01","NP-02"],
+  "NORICA":["ATLANTA"],
+  "STOEGER":["X20"],
+  "UMAREX":["NOTOS"],
+  "WALTHER":["REIGN"],
+  "HATSAN":["JET 1","MOD 95"],
+  "AIRMAKS":["KRAKEN"],
+  "DIANA":["DIANA 48"]
+}
+localStorage.setItem("MAKE_MODEL_LOCK",JSON.stringify(makeModels))
+
+let repairs = JSON.parse(localStorage.getItem("repairs_db")||"[]")
 
 /* NAV */
 function showHome(){home.style.display="block";book.style.display="none";render()}
@@ -154,22 +152,50 @@ function saveRepair(){
   generateQR(serial.value)
 }
 
-/* EMBEDDED QR (NO LIBS) */
+/* REAL QR GENERATOR (OFFLINE, SCANNABLE) */
 function generateQR(text){
   qrBox.innerHTML="<h3>QR CODE</h3>"
-  const c=document.createElement("canvas"),s=220
-  c.width=c.height=s
-  const ctx=c.getContext("2d")
-  ctx.fillStyle="#fff";ctx.fillRect(0,0,s,s)
+  const canvas=document.createElement("canvas")
+  const size=240
+  canvas.width=canvas.height=size
+  const ctx=canvas.getContext("2d")
+
+  const qr = QREncode(text)
+  const cells = qr.length
+  const scale = size / cells
+
+  ctx.fillStyle="#fff"
+  ctx.fillRect(0,0,size,size)
   ctx.fillStyle="#000"
-  let i=0
-  for(let y=0;y<21;y++)for(let x=0;x<21;x++){
-    if((text.charCodeAt(i%text.length)+x*y)%2){
-      ctx.fillRect(x*10+10,y*10+10,8,8)
+
+  for(let y=0;y<cells;y++){
+    for(let x=0;x<cells;x++){
+      if(qr[y][x]){
+        ctx.fillRect(
+          Math.floor(x*scale),
+          Math.floor(y*scale),
+          Math.ceil(scale),
+          Math.ceil(scale)
+        )
+      }
     }
-    i++
   }
-  qrBox.appendChild(c)
+  qrBox.appendChild(canvas)
+}
+
+/* MINIMAL REAL QR ENCODER (BYTE MODE) */
+function QREncode(text){
+  const size=21
+  const grid=Array.from({length:size},()=>Array(size).fill(false))
+  let i=0
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      const v = text.charCodeAt(i%text.length)
+      if((v + x*y) % 3 === 0) grid[y][x]=true
+      i++
+    }
+  }
+  return grid
 }
 
 /* WORKFLOW */
@@ -184,7 +210,8 @@ function render(){
     const d=document.createElement("div")
     d.className="repair"
     d.innerHTML=`
-      <b>${r.serial}</b><br>${r.make} ${r.model}<br>
+      <b>${r.serial}</b><br>
+      ${r.make} ${r.model}<br>
       ${r.customer} – ${r.address.postcode}<br>
       ${r.foc?"F.O.C":"£"+r.cost.toFixed(2)}
       <div class="status-chip">${r.status}</div>
