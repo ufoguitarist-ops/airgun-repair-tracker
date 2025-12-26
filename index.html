@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Airgun Repair Tracker</title>
 
-<!-- QR LIBS -->
+<!-- QR LIBRARY -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
 
@@ -37,8 +37,8 @@ button.secondary{width:100%;padding:12px;border-radius:12px;border:1px solid var
 .workflow button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
 nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0;}
 nav button{border:none;background:none;font-size:14px;}
-#qrBox canvas{margin:auto;display:block;}
-#scanner{width:100%;}
+#qrBox{margin-top:20px;text-align:center;}
+#qrBox canvas{margin:auto;}
 </style>
 </head>
 
@@ -95,7 +95,7 @@ nav button{border:none;background:none;font-size:14px;}
 </nav>
 
 <script>
-/* ================= AUTO CAPITALS ================= */
+/* ================= AUTO CAPS ================= */
 document.addEventListener("input", e=>{
   if(!e.target.hasAttribute("data-cap")) return;
   e.target.value=e.target.value.toUpperCase();
@@ -118,7 +118,6 @@ let scanner=null;
 /* ================= NAV ================= */
 function showHome(){home.style.display="block";book.style.display="none";scan.style.display="none";render();}
 function showBook(){home.style.display="none";book.style.display="block";scan.style.display="none";}
-function showScanner(){home.style.display="none";book.style.display="none";scan.style.display="block";startScanner();}
 
 /* ================= DROPDOWNS ================= */
 function populateMakes(){
@@ -132,13 +131,16 @@ function populateModels(){
 }
 make.onchange=populateModels;
 
-/* ================= SAVE ================= */
+/* ================= SAVE + QR ================= */
 function saveRepair(){
+  const serialVal = serial.value.trim();
+  if(!serialVal){ alert("Serial number required"); return; }
+
   const r={
     make:make.value,
     model:model.value,
     calibre:calibre.value,
-    serial:serial.value,
+    serial:serialVal,
     customer:customer.value,
     fault:fault.value,
     status:"BOOKED IN",
@@ -146,23 +148,29 @@ function saveRepair(){
   };
   repairs.push(r);
   localStorage.setItem("repairs_db",JSON.stringify(repairs));
-  generateQR(r.serial);
+
+  generateQR(serialVal);
 }
 
 /* ================= QR GENERATE ================= */
 function generateQR(text){
-  qrBox.innerHTML="<h3>QR CODE</h3>";
-  QRCode.toCanvas(text,{width:200},(err,canvas)=>{
-    if(!err) qrBox.appendChild(canvas);
+  qrBox.innerHTML="<h3>QR CODE FOR THIS REPAIR</h3>";
+  QRCode.toCanvas(text,{width:220},(err,canvas)=>{
+    if(err){alert("QR error");return;}
+    qrBox.appendChild(canvas);
   });
 }
 
 /* ================= SCAN ================= */
-function startScanner(){
+function showScanner(){
+  home.style.display="none";
+  book.style.display="none";
+  scan.style.display="block";
+
   scanner=new Html5Qrcode("scanner");
   scanner.start(
-    { facingMode:"environment" },
-    { fps:10, qrbox:250 },
+    {facingMode:"environment"},
+    {fps:10,qrbox:250},
     decoded=>{
       stopScanner();
       openRepair(decoded);
@@ -174,14 +182,14 @@ function stopScanner(){
   showHome();
 }
 
-/* ================= FIND REPAIR ================= */
+/* ================= FIND ================= */
 function openRepair(serial){
   const idx=repairs.findIndex(r=>r.serial===serial);
   if(idx>-1){
     repairs[idx].open=true;
     localStorage.setItem("repairs_db",JSON.stringify(repairs));
     render();
-  }else alert("Repair not found");
+  } else alert("Repair not found");
 }
 
 /* ================= WORKFLOW ================= */
