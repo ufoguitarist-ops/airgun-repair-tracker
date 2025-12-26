@@ -134,16 +134,13 @@
     "BLACKWOLF R B LAM",
     "BLACKWOLF R B WAL",
     "BLACKWOLF R B TAC",
-    "BLACKWOLF R C TAC"
+    "BLACKWOLF R C TAC",
+    "ALPHA WOLF TAC LAM",
+    "ALPHA WOLF BRONZE SAFARI",
+    "ALPHA WOLF BLUE SE"
   ],
-  "GAMO": [
-    "PHOX"
-  ],
-  "KRAL": [
-    "NP-01",
-    "NP-02",
-    "NP-03"
-  ],
+  "GAMO": ["PHOX"],
+  "KRAL": ["NP-01", "NP-02", "NP-03"],
   "WEIHRAUCH": [
     "HW100",
     "HW100 BP",
@@ -179,44 +176,14 @@
     "HW45 BLACK STAR",
     "HW45 SILVER STAR"
   ],
-  "REXIMEX": [
-    "THRONE"
-  ],
-  "PISTOLS": [
-    "AIRBUG",
-    "AIRTAC",
-    "CP2",
-    "ZORAKI"
-  ],
-  "RAW": [
-    "HM1000X",
-    "HM1000X LRT"
-  ],
-  "DIANA": [
-    "DIANA 48"
-  ],
-  "NORICA": [
-    "ATLANTA",
-    "OMNIA"
-  ],
-  "STOEGER": [
-    "X10",
-    "X20"
-  ],
-  "UMAREX": [
-    "NOTOS"
-  ],
-  "WALTHER": [
-    "REIGN"
-  ],
-  "HATSAN": [
-    "JET 1",
-    "JET 2",
-    "MOD 95"
-  ],
-  "AIRMAKS": [
-    "ARMS PRIME 1",
-    "KRAKEN",
-    "KRAKEN X"
-  ]
+  "REXIMEX": ["THRONE"],
+  "PISTOLS": ["AIRBUG", "AIRTAC", "CP2", "ZORAKI"],
+  "RAW": ["HM1000X", "HM1000X LRT"],
+  "DIANA": ["DIANA 48"],
+  "NORICA": ["ATLANTA", "OMNIA"],
+  "STOEGER": ["X10", "X20"],
+  "UMAREX": ["NOTOS"],
+  "WALTHER": ["REIGN"],
+  "HATSAN": ["JET 1", "JET 2", "MOD 95"],
+  "AIRMAKS": ["ARMS PRIME 1", "KRAKEN", "KRAKEN X"]
 }
