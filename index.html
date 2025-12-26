@@ -8,12 +8,12 @@
 <script src="qr.js"></script>
 
 <style>
-/* (styling unchanged from your working Phase 1 version) */
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;margin:0;background:#f2f3f5}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;background:#f2f3f5}
 header{padding:14px;font-size:20px;font-weight:700;border-bottom:1px solid #ccc}
-.page{padding:16px 16px 120px}
-.card{background:#fff;border-radius:16px;padding:16px;max-width:620px;margin:auto}
-button{padding:14px;border-radius:14px;border:none;background:#2563eb;color:#fff;font-weight:700}
+.page{padding:16px}
+.card{background:#fff;border-radius:16px;padding:16px;max-width:520px;margin:auto}
+input{padding:12px;width:100%;border-radius:12px;border:1px solid #ccc;margin-bottom:12px}
+button{padding:14px;border-radius:14px;border:none;background:#2563eb;color:#fff;font-weight:700;width:100%}
 #qrBox{text-align:center;margin-top:20px}
 canvas{margin:auto}
 </style>
@@ -26,7 +26,6 @@ canvas{margin:auto}
   <div class="card">
     <h2>BOOK IN REPAIR</h2>
     <input id="serial" placeholder="SERIAL NUMBER">
-    <br><br>
     <button onclick="generate()">BOOK IN REPAIR</button>
     <div id="qrBox"></div>
   </div>
@@ -61,5 +60,6 @@ function generate(){
   qrBox.appendChild(canvas);
 }
 </script>
+
 </body>
 </html>
