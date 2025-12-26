@@ -17,21 +17,27 @@ $("#themeBtn").onclick = ()=>{
   $("#themeBtn").textContent = t==="dark"?"🌙":"☀️";
 };
 
-/* ================= NAV ================= */
+/* ================= NAVIGATION ================= */
 function showHome(){
-  $("#home").style.display="block";
-  $("#book").style.display="none";
+  $("#home").style.display = "block";
+  $("#book").style.display = "none";
 }
 function showBook(){
-  $("#home").style.display="none";
-  $("#book").style.display="block";
+  $("#home").style.display = "none";
+  $("#book").style.display = "block";
 }
+
+/* 👇 THIS IS THE CRITICAL FIX */
+window.showHome = showHome;
+window.showBook = showBook;
 
 /* ================= LOAD MODELS ================= */
 async function loadModels(){
   DB.models = await fetch("data/makes-models.json").then(r=>r.json());
+
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
   if(saved) DB.repairs = saved.repairs || [];
+
   populateMakes();
   renderRepairs();
 }
@@ -47,26 +53,28 @@ function populateModels(){
   $("#modelId").innerHTML = (DB.models[make]||[])
     .map(m=>`<option>${m}</option>`).join("");
 }
-$("#makeId").onchange=populateModels;
+$("#makeId").onchange = populateModels;
 
 /* ================= AUTO CAPS ================= */
 document.addEventListener("input",e=>{
   if(!e.target.dataset.cap)return;
-  e.target.value=e.target.dataset.cap==="email"
-    ?e.target.value.toLowerCase()
-    :e.target.value.toUpperCase();
+  e.target.value = e.target.dataset.cap==="email"
+    ? e.target.value.toLowerCase()
+    : e.target.value.toUpperCase();
 });
 
 /* ================= SAVE ================= */
-$("#saveBookingBtn").onclick=e=>{
+$("#saveBookingBtn").onclick = e=>{
   e.preventDefault();
+
   DB.repairs.push({
-    serial:$("#serial").value,
-    make:$("#makeId").value,
-    model:$("#modelId").value,
-    status:"BOOKED IN"
+    serial: $("#serial").value,
+    make: $("#makeId").value,
+    model: $("#modelId").value,
+    status: "BOOKED IN"
   });
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(DB));
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
   showToast("REPAIR BOOKED IN");
   showHome();
   renderRepairs();
@@ -76,33 +84,37 @@ $("#saveBookingBtn").onclick=e=>{
 function renderRepairs(){
   const list=$("#repairList");
   list.innerHTML="";
+
   DB.repairs.forEach((r,i)=>{
     const d=document.createElement("div");
     d.className="repair-item";
-    d.innerHTML=`<strong>${r.serial}</strong>
+    d.innerHTML=`
+      <strong>${r.serial}</strong>
       <div>${r.make} ${r.model}</div>
-      <div class="status ${r.status}">${r.status}</div>`;
+      <div class="status ${r.status}">${r.status}</div>
+    `;
     d.onclick=()=>changeStatus(i);
     list.appendChild(d);
   });
-  $("#homeCount").textContent=`${DB.repairs.length} REPAIRS`;
+
+  $("#homeCount").textContent = `${DB.repairs.length} REPAIRS`;
 }
 
 function changeStatus(i){
-  const s=prompt(
+  const s = prompt(
     "SET STATUS\nBOOKED IN\nIN PROGRESS\nON SOAK\nWAITING FOR PARTS\nSENT AWAY\nREADY\nRETURNED",
     DB.repairs[i].status
   );
-  if(!s)return;
-  DB.repairs[i].status=s.toUpperCase();
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(DB));
+  if(!s) return;
+  DB.repairs[i].status = s.toUpperCase();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
   renderRepairs();
 }
 
 /* ================= TOAST ================= */
-function showToast(m){
+function showToast(msg){
   const t=$("#toast");
-  t.textContent=m;
+  t.textContent=msg;
   t.classList.add("show");
   setTimeout(()=>t.classList.remove("show"),2000);
 }
