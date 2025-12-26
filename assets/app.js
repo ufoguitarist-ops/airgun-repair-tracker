@@ -1,244 +1,99 @@
-/* ==================================================
-   AIRGUN REPAIR TRACKER – FULL APP.JS
-   Excel-driven Make / Model dropdowns
-   ================================================== */
-
 const $ = q => document.querySelector(q);
 const STORAGE_KEY = "airgun_repairs_demo";
 const THEME_KEY = "airgun_theme";
 
-/* ==================================================
-   GLOBAL STATE
-================================================== */
-let DB = {
-  makes: [],
-  models: {},
-  repairs: [],
-  custom: {}
-};
+let DB = { repairs:[], custom:{} };
 
-/* ==================================================
-   THEME TOGGLE
-================================================== */
+/* ================= THEME ================= */
 function initTheme(){
   const t = localStorage.getItem(THEME_KEY) || "dark";
   document.documentElement.setAttribute("data-theme", t);
-  const btn = $("#themeBtn");
-  if(btn) btn.textContent = t === "dark" ? "🌙" : "☀️";
+  $("#themeBtn").textContent = t==="dark"?"🌙":"☀️";
 }
-
-const themeBtn = $("#themeBtn");
-if(themeBtn){
-  themeBtn.onclick = () => {
-    const cur = document.documentElement.getAttribute("data-theme") || "dark";
-    const next = cur === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem(THEME_KEY, next);
-    themeBtn.textContent = next === "dark" ? "🌙" : "☀️";
-  };
-}
-
-/* ==================================================
-   LOAD EXCEL JSON (AUTHORITATIVE)
-================================================== */
-async function loadExcelModels(){
-  const res = await fetch("data/makes-models.json");
-  const seed = await res.json();
-
-  // Load stored data
-  const old = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-
-  DB.repairs = Array.isArray(old.repairs) ? old.repairs : [];
-  DB.custom  = (old.custom && typeof old.custom === "object") ? old.custom : {};
-
-  // Seed makes/models EXACTLY from Excel
-  DB.makes  = Object.keys(seed);
-  DB.models = JSON.parse(JSON.stringify(seed));
-
-  // Merge custom additions (double-tap)
-  for(const [make, list] of Object.entries(DB.custom)){
-    if(!DB.models[make]){
-      DB.models[make] = [];
-      DB.makes.push(make);
-    }
-    list.forEach(m=>{
-      if(!DB.models[make].includes(m)){
-        DB.models[make].push(m);
-      }
-    });
-  }
-
-  saveDB();
-  populateMakes();
-}
-
-/* ==================================================
-   SAVE DB (repairs + custom only)
-================================================== */
-function saveDB(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    repairs: DB.repairs,
-    custom: DB.custom
-  }));
-}
-
-/* ==================================================
-   AUTO CAPS (EMAIL EXCLUDED)
-================================================== */
-document.addEventListener("input", e => {
-  const el = e.target;
-  if(!el || !el.dataset || !el.dataset.cap) return;
-
-  if(el.dataset.cap === "email"){
-    el.value = el.value.toLowerCase();
-  } else {
-    el.value = el.value.toUpperCase();
-  }
-});
-
-/* ==================================================
-   ROUTING
-================================================== */
-function showPage(id){
-  document.querySelectorAll(".page").forEach(p => p.style.display = "none");
-  const el = document.getElementById(id);
-  if(el) el.style.display = "block";
-}
-
-function route(){
-  const page = location.hash.replace("#","") || "home";
-  showPage(page);
-}
-
-window.addEventListener("hashchange", route);
-
-/* Navigation buttons */
-const navMap = {
-  toHome: "#home",
-  toBook: "#book",
-  toScan: "#scan",
-  toSearch: "#search",
-  toSettings: "#settings"
+$("#themeBtn").onclick = ()=>{
+  const t = document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",t);
+  localStorage.setItem(THEME_KEY,t);
+  $("#themeBtn").textContent = t==="dark"?"🌙":"☀️";
 };
-for(const [btn, hash] of Object.entries(navMap)){
-  const el = document.getElementById(btn);
-  if(el) el.onclick = () => location.hash = hash;
+
+/* ================= LOAD MODELS ================= */
+async function loadExcelModels(){
+  const seed = await fetch("data/makes-models.json").then(r=>r.json());
+  const old = JSON.parse(localStorage.getItem(STORAGE_KEY))||{};
+  DB.repairs = old.repairs||[];
+  DB.custom = old.custom||{};
+  DB.models = seed;
+  DB.makes = Object.keys(seed);
+  populateMakes();
+  renderRepairs();
 }
 
-/* ==================================================
-   MAKE / MODEL DROPDOWNS
-================================================== */
+/* ================= DROPDOWNS ================= */
 function populateMakes(){
-  const makeSel = $("#makeId");
-  if(!makeSel) return;
-
-  makeSel.innerHTML = DB.makes.map(m=>`<option value="${m}">${m}</option>`).join("");
+  $("#makeId").innerHTML = DB.makes.map(m=>`<option>${m}</option>`).join("");
   populateModels();
 }
-
 function populateModels(){
-  const makeSel  = $("#makeId");
-  const modelSel = $("#modelId");
-  if(!makeSel || !modelSel) return;
+  const make=$("#makeId").value;
+  $("#modelId").innerHTML=(DB.models[make]||[]).map(m=>`<option>${m}</option>`).join("");
+}
+$("#makeId").onchange=populateModels;
 
-  const make = makeSel.value;
-  modelSel.innerHTML = (DB.models[make] || [])
-    .map(m=>`<option value="${m}">${m}</option>`).join("");
+/* ================= AUTO CAPS ================= */
+document.addEventListener("input",e=>{
+  if(!e.target.dataset.cap)return;
+  e.target.value=e.target.dataset.cap==="email"
+    ?e.target.value.toLowerCase()
+    :e.target.value.toUpperCase();
+});
+
+/* ================= SAVE ================= */
+$("#saveBookingBtn").onclick=e=>{
+  e.preventDefault();
+  DB.repairs.push({
+    serial:$("#serial").value,
+    make:$("#makeId").value,
+    model:$("#modelId").value,
+    status:"BOOKED IN"
+  });
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(DB));
+  showToast("REPAIR BOOKED IN");
+  renderRepairs();
+};
+
+/* ================= LIST ================= */
+function renderRepairs(){
+  const list=$("#repairList");
+  list.innerHTML="";
+  DB.repairs.forEach((r,i)=>{
+    const d=document.createElement("div");
+    d.className="repair-item";
+    d.innerHTML=`<strong>${r.serial}</strong>
+      <div>${r.make} ${r.model}</div>
+      <div class="status ${r.status}">${r.status}</div>`;
+    d.onclick=()=>changeStatus(i);
+    list.appendChild(d);
+  });
+  $("#homeCount").textContent=`${DB.repairs.length} REPAIRS`;
 }
 
-const makeSel = $("#makeId");
-if(makeSel) makeSel.onchange = populateModels;
-
-/* Double-tap ADD MAKE */
-if(makeSel){
-  makeSel.ondblclick = () => {
-    const m = prompt("ADD NEW MAKE")?.trim().toUpperCase();
-    if(!m) return;
-
-    if(!DB.makes.includes(m)){
-      DB.makes.push(m);
-      DB.models[m] = [];
-      DB.custom[m] = [];
-      saveDB();
-      populateMakes();
-      makeSel.value = m;
-      populateModels();
-    }
-  };
+function changeStatus(i){
+  const s=prompt("STATUS","IN PROGRESS");
+  if(!s)return;
+  DB.repairs[i].status=s.toUpperCase();
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(DB));
+  renderRepairs();
 }
 
-/* Double-tap ADD MODEL */
-const modelSel = $("#modelId");
-if(modelSel){
-  modelSel.ondblclick = () => {
-    const make = makeSel.value;
-    if(!make) return alert("SELECT MAKE FIRST");
-
-    const m = prompt(`ADD MODEL FOR ${make}`)?.trim().toUpperCase();
-    if(!m) return;
-
-    if(!DB.models[make].includes(m)){
-      DB.models[make].push(m);
-      DB.custom[make] = DB.custom[make] || [];
-      DB.custom[make].push(m);
-      saveDB();
-      populateModels();
-      modelSel.value = m;
-    }
-  };
-}
-
-/* ==================================================
-   SAVE BOOKING (DEMO)
-================================================== */
-function showToast(msg){
-  const t = $("#toast");
-  if(!t) return;
-  t.textContent = msg;
+/* ================= TOAST ================= */
+function showToast(m){
+  const t=$("#toast");
+  t.textContent=m;
   t.classList.add("show");
   setTimeout(()=>t.classList.remove("show"),2000);
 }
 
-function updateHome(){
-  const el = $("#homeCount");
-  if(el) el.textContent = `${DB.repairs.length} REPAIRS IN DEMO`;
-}
-
-const saveBtn = $("#saveBookingBtn");
-if(saveBtn){
-  saveBtn.onclick = e => {
-    e.preventDefault();
-
-    const serial = $("#serial")?.value.trim().toUpperCase();
-    if(!serial) return showToast("SERIAL NUMBER REQUIRED");
-
-    const repair = {
-      serial,
-      make: makeSel.value,
-      model: modelSel.value,
-      calibre: $("#calibre")?.value.toUpperCase(),
-      name: $("#customerName")?.value.toUpperCase(),
-      phone: $("#phone")?.value.toUpperCase(),
-      email: $("#email")?.value.toLowerCase(),
-      address: $("#address")?.value.toUpperCase(),
-      fault: $("#fault")?.value.toUpperCase(),
-      foc: $("#foc")?.checked || false,
-      status: "BOOKED IN",
-      created: new Date().toISOString()
-    };
-
-    DB.repairs.push(repair);
-    saveDB();
-    showToast("REPAIR BOOKED IN");
-    $("#bookForm")?.reset();
-    updateHome();
-  };
-}
-
-/* ==================================================
-   INIT
-================================================== */
+/* ================= INIT ================= */
 initTheme();
 loadExcelModels();
-route();
-updateHome();
