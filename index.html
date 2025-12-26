@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Airgun Repair Tracker</title>
 
-<!-- QR LIBRARY -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
 :root{
@@ -23,16 +21,15 @@ body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,
 header{padding:14px 16px;font-size:20px;font-weight:700;border-bottom:1px solid var(--border);}
 .page{padding:16px;padding-bottom:140px;}
 .card{background:var(--card);border-radius:16px;padding:16px;max-width:520px;margin:auto;}
-h2{margin:0 0 16px;}
 label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:14px;}
 input,select,textarea{padding:12px;border-radius:12px;border:1px solid var(--border);font-size:15px;}
 button.primary{width:100%;padding:14px;border:none;border-radius:14px;background:var(--accent);color:white;font-size:16px;font-weight:700;}
-button.secondary{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:#fff;font-weight:700;}
+button.secondary{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:#fff;font-weight:700;margin-bottom:10px;}
 .repair{border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;}
 .status-chip{display:inline-block;background:var(--chip);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700;margin-top:6px;}
-.workflow{margin-top:12px;display:none;}
+.workflow{margin-top:10px;display:none;}
 .workflow.active{display:block;}
-.workflow-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.workflow-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .workflow button{padding:10px;border-radius:12px;border:1px solid var(--border);background:#fff;font-weight:700;font-size:12px;}
 .workflow button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
 nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0;}
@@ -49,8 +46,7 @@ nav button{border:none;background:none;font-size:14px;}
 <!-- HOME -->
 <div class="page" id="home">
   <div class="card">
-    <h2>REPAIRS</h2>
-    <button class="secondary" onclick="showScanner()">📷 Scan QR</button>
+    <button class="secondary" onclick="clearRepairs()">🧹 Clear All Repairs</button>
     <div id="list"></div>
     <div id="count"></div>
   </div>
@@ -59,33 +55,15 @@ nav button{border:none;background:none;font-size:14px;}
 <!-- BOOK -->
 <div class="page" id="book" style="display:none;">
   <div class="card">
-    <h2>BOOK IN REPAIR</h2>
-
     <label>MAKE <select id="make"></select></label>
     <label>MODEL <select id="model"></select></label>
 
-    <label>CALIBRE
-      <select id="calibre">
-        <option>.177</option><option>.20</option><option>.22</option><option>.25</option>
-      </select>
-    </label>
-
     <label>SERIAL NUMBER <input id="serial" data-cap></label>
     <label>CUSTOMER NAME <input id="customer" data-cap></label>
-    <label>FAULT <textarea id="fault" data-cap></textarea></label>
 
     <button class="primary" onclick="saveRepair()">BOOK IN REPAIR</button>
 
     <div id="qrBox"></div>
-  </div>
-</div>
-
-<!-- SCANNER -->
-<div class="page" id="scan" style="display:none;">
-  <div class="card">
-    <h2>SCAN QR CODE</h2>
-    <div id="scanner"></div>
-    <button class="secondary" onclick="stopScanner()">Close Scanner</button>
   </div>
 </div>
 
@@ -96,15 +74,16 @@ nav button{border:none;background:none;font-size:14px;}
 
 <script>
 /* ================= AUTO CAPS ================= */
-document.addEventListener("input", e=>{
-  if(!e.target.hasAttribute("data-cap")) return;
-  e.target.value=e.target.value.toUpperCase();
-}, true);
+document.addEventListener("input",e=>{
+  if(e.target.hasAttribute("data-cap")){
+    e.target.value=e.target.value.toUpperCase();
+  }
+},true);
 
 /* ================= STATUS ================= */
 const STATUSES=["BOOKED IN","IN PROGRESS","ON SOAK","WAITING FOR PARTS","SENT AWAY","READY","RETURNED"];
 
-/* ================= DATA ================= */
+/* ================= LOCKED MAKES & MODELS ================= */
 const makeModels={
   "AIR ARMS":["S400","S410","S510","TX200"],
   "BSA":["R10","R12"],
@@ -112,12 +91,12 @@ const makeModels={
   "WEIHRAUCH":["HW100","HW97"]
 };
 
+/* ================= DATA ================= */
 let repairs=JSON.parse(localStorage.getItem("repairs_db")||"[]");
-let scanner=null;
 
 /* ================= NAV ================= */
-function showHome(){home.style.display="block";book.style.display="none";scan.style.display="none";render();}
-function showBook(){home.style.display="none";book.style.display="block";scan.style.display="none";}
+function showHome(){home.style.display="block";book.style.display="none";render();}
+function showBook(){home.style.display="none";book.style.display="block";}
 
 /* ================= DROPDOWNS ================= */
 function populateMakes(){
@@ -133,63 +112,30 @@ make.onchange=populateModels;
 
 /* ================= SAVE + QR ================= */
 function saveRepair(){
-  const serialVal = serial.value.trim();
-  if(!serialVal){ alert("Serial number required"); return; }
+  const s=serial.value.trim();
+  if(!s){alert("Serial required");return;}
 
-  const r={
-    make:make.value,
-    model:model.value,
-    calibre:calibre.value,
-    serial:serialVal,
-    customer:customer.value,
-    fault:fault.value,
-    status:"BOOKED IN",
-    open:false
-  };
+  const r={serial:s,make:make.value,model:model.value,status:"BOOKED IN",open:false};
   repairs.push(r);
   localStorage.setItem("repairs_db",JSON.stringify(repairs));
-
-  generateQR(serialVal);
+  showQR(s);
 }
 
-/* ================= QR GENERATE ================= */
-function generateQR(text){
+/* ================= QR ================= */
+function showQR(text){
   qrBox.innerHTML="<h3>QR CODE FOR THIS REPAIR</h3>";
   QRCode.toCanvas(text,{width:220},(err,canvas)=>{
-    if(err){alert("QR error");return;}
-    qrBox.appendChild(canvas);
+    if(!err)qrBox.appendChild(canvas);
   });
 }
 
-/* ================= SCAN ================= */
-function showScanner(){
-  home.style.display="none";
-  book.style.display="none";
-  scan.style.display="block";
-
-  scanner=new Html5Qrcode("scanner");
-  scanner.start(
-    {facingMode:"environment"},
-    {fps:10,qrbox:250},
-    decoded=>{
-      stopScanner();
-      openRepair(decoded);
-    }
-  );
-}
-function stopScanner(){
-  if(scanner){scanner.stop().then(()=>scanner.clear());scanner=null;}
-  showHome();
-}
-
-/* ================= FIND ================= */
-function openRepair(serial){
-  const idx=repairs.findIndex(r=>r.serial===serial);
-  if(idx>-1){
-    repairs[idx].open=true;
-    localStorage.setItem("repairs_db",JSON.stringify(repairs));
+/* ================= CLEAR REPAIRS ================= */
+function clearRepairs(){
+  if(confirm("Delete ALL repair bookings?")){
+    repairs=[];
+    localStorage.setItem("repairs_db","[]");
     render();
-  } else alert("Repair not found");
+  }
 }
 
 /* ================= WORKFLOW ================= */
