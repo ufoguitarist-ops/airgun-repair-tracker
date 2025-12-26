@@ -3,24 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Book In Repair</title>
+  <title>Airgun Repair Tracker</title>
 
-  <!-- App CSS -->
-  <link rel="stylesheet" href="assets/style.css" />
-
+  <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
 
 <header class="top-bar">
-  <h1>BOOK IN REPAIR</h1>
+  <h1>Airgun Repair Tracker</h1>
   <button id="themeBtn" class="icon-btn">🌙</button>
 </header>
 
-<main class="page" id="book">
+<!-- ================= HOME / REPAIR LIST ================= -->
+<main class="page" id="home">
+
+  <div class="form-card">
+    <h2>REPAIRS</h2>
+    <div id="repairList"></div>
+    <p id="homeCount" class="muted"></p>
+  </div>
+
+</main>
+
+<!-- ================= BOOK IN REPAIR ================= -->
+<main class="page" id="book" style="display:none;">
 
   <form id="bookForm" class="form-card">
 
-    <!-- ITEM TYPE -->
+    <h2>BOOK IN REPAIR</h2>
+
     <label>
       ITEM TYPE
       <select id="itemType" data-cap>
@@ -30,28 +41,21 @@
       </select>
     </label>
 
-    <!-- MAKE -->
     <label>
       MAKE
-      <select id="makeId" data-cap required>
-        <option value="">SELECT MAKE</option>
-      </select>
+      <select id="makeId" data-cap></select>
       <small>Double-tap to add new make</small>
     </label>
 
-    <!-- MODEL -->
     <label>
       MODEL
-      <select id="modelId" data-cap required>
-        <option value="">SELECT MODEL</option>
-      </select>
+      <select id="modelId" data-cap></select>
       <small>Double-tap to add new model</small>
     </label>
 
-    <!-- CALIBRE -->
     <label>
       CALIBRE
-      <select id="calibre" data-cap required>
+      <select id="calibre" data-cap>
         <option value="">SELECT CALIBRE</option>
         <option value=".177">.177</option>
         <option value=".20">.20</option>
@@ -60,49 +64,41 @@
       </select>
     </label>
 
-    <!-- SERIAL -->
     <label>
       SERIAL NUMBER
-      <input id="serial" data-cap type="text" required />
+      <input id="serial" data-cap required />
     </label>
 
-    <!-- CUSTOMER NAME -->
     <label>
       CUSTOMER NAME
-      <input id="customerName" data-cap type="text" required />
+      <input id="customerName" data-cap />
     </label>
 
-    <!-- PHONE -->
     <label>
       PHONE NUMBER
-      <input id="phone" data-cap type="tel" />
+      <input id="phone" data-cap />
     </label>
 
-    <!-- EMAIL -->
     <label>
       EMAIL ADDRESS
       <input id="email" data-cap="email" type="email" />
     </label>
 
-    <!-- ADDRESS -->
     <label>
       ADDRESS
-      <textarea id="address" data-cap rows="3"></textarea>
+      <textarea id="address" data-cap rows="2"></textarea>
     </label>
 
-    <!-- FAULT -->
     <label>
       FAULT DESCRIPTION
-      <textarea id="fault" data-cap rows="3" required></textarea>
+      <textarea id="fault" data-cap rows="3"></textarea>
     </label>
 
-    <!-- FREE OF CHARGE -->
     <label class="checkbox-row">
       <input type="checkbox" id="foc" />
       FREE OF CHARGE (WARRANTY)
     </label>
 
-    <!-- SAVE -->
     <button id="saveBookingBtn" class="primary-btn">
       BOOK IN REPAIR
     </button>
@@ -111,11 +107,8 @@
 
 </main>
 
-<!-- TOAST -->
 <div id="toast" class="toast"></div>
 
-<!-- App JS -->
 <script src="assets/app.js"></script>
-
 </body>
 </html>
