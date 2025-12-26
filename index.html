@@ -1,179 +1,120 @@
-<!doctype html>
-<html lang="en" data-theme="dark">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Airgun Repair Tracker</title>
-  <meta name="theme-color" content="#0f1318" />
-  <link rel="stylesheet" href="assets/styles.css" />
-  <link rel="stylesheet" href="assets/print.css" />
-  <link rel="manifest" href="manifest.webmanifest" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book In Repair</title>
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="assets/style.css" />
+
 </head>
 <body>
 
-<div class="container">
+<header class="top-bar">
+  <h1>BOOK IN REPAIR</h1>
+  <button id="themeBtn" class="icon-btn">🌙</button>
+</header>
 
-  <div class="topbar no-print">
-    <div class="brand">
-      <div style="font-size:20px;">🛠️</div>
-      <div>Airgun Repair Tracker</div>
-      <div class="badge">Demo</div>
-    </div>
-    <button class="iconbtn" id="themeBtn">🌙</button>
-  </div>
+<main class="page" id="book">
 
-  <!-- HOME -->
-  <section id="home" class="page">
-    <div class="card hero">
-      <div class="h1">Premium Workshop Repair System</div>
-      <p class="p">Book in repairs, scan QR tickets, update statuses and print labels fast.</p>
-      <div class="small" id="homeCount"></div>
-    </div>
+  <form id="bookForm" class="form-card">
 
-    <div class="actions">
-      <a class="card action" href="#book">
-        <div class="left">
-          <div style="font-size:24px;">🧾</div>
-          <div>
-            <div class="title">Book In Repair</div>
-            <div class="sub">Create booking & QR</div>
-          </div>
-        </div>
-        <div class="pill">Open</div>
-      </a>
+    <!-- ITEM TYPE -->
+    <label>
+      ITEM TYPE
+      <select id="itemType" data-cap>
+        <option value="RIFLE">RIFLE</option>
+        <option value="PISTOL">PISTOL</option>
+        <option value="OTHER">OTHER</option>
+      </select>
+    </label>
 
-      <a class="card action" href="#scan">
-        <div class="left">
-          <div style="font-size:24px;">📷</div>
-          <div>
-            <div class="title">Scan QR</div>
-            <div class="sub">Open repair instantly</div>
-          </div>
-        </div>
-        <div class="pill">Scan</div>
-      </a>
+    <!-- MAKE -->
+    <label>
+      MAKE
+      <select id="makeId" data-cap required>
+        <option value="">SELECT MAKE</option>
+      </select>
+      <small>Double-tap to add new make</small>
+    </label>
 
-      <a class="card action" href="#search">
-        <div class="left">
-          <div style="font-size:24px;">🔎</div>
-          <div>
-            <div class="title">Search Repairs</div>
-            <div class="sub">Serial / Name / Phone</div>
-          </div>
-        </div>
-        <div class="pill">Find</div>
-      </a>
+    <!-- MODEL -->
+    <label>
+      MODEL
+      <select id="modelId" data-cap required>
+        <option value="">SELECT MODEL</option>
+      </select>
+      <small>Double-tap to add new model</small>
+    </label>
 
-      <a class="card action" href="#settings">
-        <div class="left">
-          <div style="font-size:24px;">⚙️</div>
-          <div>
-            <div class="title">Settings</div>
-            <div class="sub">Demo controls</div>
-          </div>
-        </div>
-        <div class="pill">Manage</div>
-      </a>
-    </div>
-  </section>
+    <!-- CALIBRE -->
+    <label>
+      CALIBRE
+      <select id="calibre" data-cap required>
+        <option value="">SELECT CALIBRE</option>
+        <option value=".177">.177</option>
+        <option value=".20">.20</option>
+        <option value=".22">.22</option>
+        <option value=".25">.25</option>
+      </select>
+    </label>
 
-  <!-- BOOK -->
-  <section id="book" class="page" style="display:none;">
-    <div class="card hero">
-      <div class="h1">Book In Repair</div>
-      <p class="p">Auto capitals enabled (email excluded).</p>
-    </div>
+    <!-- SERIAL -->
+    <label>
+      SERIAL NUMBER
+      <input id="serial" data-cap type="text" required />
+    </label>
 
-    <form id="bookForm" class="card pad" autocomplete="off">
+    <!-- CUSTOMER NAME -->
+    <label>
+      CUSTOMER NAME
+      <input id="customerName" data-cap type="text" required />
+    </label>
 
-      <div class="field">
-        <label>ITEM TYPE</label>
-        <select id="itemType">
-          <option value="RIFLE">AIR RIFLE</option>
-          <option value="PISTOL">AIR PISTOL</option>
-          <option value="OTHER">OTHER ITEM</option>
-        </select>
-      </div>
+    <!-- PHONE -->
+    <label>
+      PHONE NUMBER
+      <input id="phone" data-cap type="tel" />
+    </label>
 
-      <div class="field">
-        <label>MAKE</label>
-        <select id="makeId"></select>
-      </div>
+    <!-- EMAIL -->
+    <label>
+      EMAIL ADDRESS
+      <input id="email" data-cap="email" type="email" />
+    </label>
 
-      <div class="field">
-        <label>MODEL</label>
-        <select id="modelId"></select>
-      </div>
+    <!-- ADDRESS -->
+    <label>
+      ADDRESS
+      <textarea id="address" data-cap rows="3"></textarea>
+    </label>
 
-      <div class="field">
-        <label>CALIBRE</label>
-        <input id="calibre" data-cap="calibre" />
-      </div>
+    <!-- FAULT -->
+    <label>
+      FAULT DESCRIPTION
+      <textarea id="fault" data-cap rows="3" required></textarea>
+    </label>
 
-      <div class="field">
-        <label>SERIAL NUMBER</label>
-        <input id="serial" data-cap="serial" class="mono" />
-      </div>
+    <!-- FREE OF CHARGE -->
+    <label class="checkbox-row">
+      <input type="checkbox" id="foc" />
+      FREE OF CHARGE (WARRANTY)
+    </label>
 
-      <div class="field">
-        <label>CUSTOMER NAME</label>
-        <input id="customerName" data-cap="customerName" />
-      </div>
+    <!-- SAVE -->
+    <button id="saveBookingBtn" class="primary-btn">
+      BOOK IN REPAIR
+    </button>
 
-      <div class="field">
-        <label>PHONE</label>
-        <input id="phone" data-cap="phone" />
-      </div>
+  </form>
 
-      <div class="field">
-        <label>EMAIL (lowercase)</label>
-        <input id="email" data-cap="email" />
-      </div>
+</main>
 
-      <div class="field">
-        <label>ADDRESS</label>
-        <textarea id="address" data-cap="address"></textarea>
-      </div>
-
-      <div class="field">
-        <label>FAULT</label>
-        <textarea id="fault" data-cap="fault"></textarea>
-      </div>
-
-      <div class="field">
-        <label>FREE OF CHARGE (WARRANTY)</label>
-        <input type="checkbox" id="foc" />
-      </div>
-
-      <button id="saveBookingBtn" class="btn primary">💾 Save & Generate QR</button>
-
-    </form>
-  </section>
-
-  <!-- PLACEHOLDERS (filled by JS) -->
-  <section id="scan" class="page" style="display:none;"></section>
-  <section id="search" class="page" style="display:none;"></section>
-  <section id="repair" class="page" style="display:none;"></section>
-  <section id="label" class="page" style="display:none;"></section>
-  <section id="receipt" class="page" style="display:none;"></section>
-  <section id="settings" class="page" style="display:none;"></section>
-
-</div>
-
-<div class="footerbar no-print">
-  <div class="wrap">
-    <button class="iconbtn" id="toHome">🏠</button>
-    <button class="iconbtn" id="toBook">🧾</button>
-    <button class="iconbtn" id="toScan">📷</button>
-    <button class="iconbtn" id="toSearch">🔎</button>
-    <button class="iconbtn" id="toSettings">⚙️</button>
-  </div>
-</div>
-
+<!-- TOAST -->
 <div id="toast" class="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.10/minified/html5-qrcode.min.js"></script>
+<!-- App JS -->
 <script src="assets/app.js"></script>
 
 </body>
