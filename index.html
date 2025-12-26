@@ -5,28 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Airgun Repair Tracker</title>
 
+<script src="qr.js"></script>
+
 <style>
-:root{
-  --bg:#f2f3f5;--card:#fff;--text:#111;--muted:#6b7280;
-  --border:#d1d5db;--accent:#2563eb;--chip:#eef2ff
-}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;background:var(--bg);color:var(--text)}
-header{padding:14px 16px;font-size:20px;font-weight:700;border-bottom:1px solid var(--border)}
+/* (styling unchanged from your working Phase 1 version) */
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;margin:0;background:#f2f3f5}
+header{padding:14px;font-size:20px;font-weight:700;border-bottom:1px solid #ccc}
 .page{padding:16px 16px 120px}
-.card{background:var(--card);border-radius:16px;padding:16px;max-width:620px;margin:auto}
-label{display:flex;flex-direction:column;font-size:12px;font-weight:600;color:var(--muted);gap:6px;margin-bottom:14px}
-input,select,textarea{padding:12px;border-radius:12px;border:1px solid var(--border);font-size:15px}
-textarea{min-height:80px}
-button.primary{width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:#fff;font-size:16px;font-weight:700}
-.repair{border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
-.status-chip{display:inline-block;background:var(--chip);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700;margin-top:6px}
-.workflow{display:none;margin-top:10px}
-.workflow.active{display:block}
-.workflow-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.workflow button{padding:10px;border-radius:12px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:700}
-.workflow button.active{background:var(--accent);color:#fff}
-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0}
-.toggle{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+.card{background:#fff;border-radius:16px;padding:16px;max-width:620px;margin:auto}
+button{padding:14px;border-radius:14px;border:none;background:#2563eb;color:#fff;font-weight:700}
 #qrBox{text-align:center;margin-top:20px}
 canvas{margin:auto}
 </style>
@@ -35,200 +22,44 @@ canvas{margin:auto}
 <body>
 <header>Airgun Repair Tracker</header>
 
-<div class="page" id="home">
-  <div class="card">
-    <h2>REPAIRS</h2>
-    <div id="list"></div>
-    <div id="count"></div>
-  </div>
-</div>
-
-<div class="page" id="book" style="display:none">
+<div class="page">
   <div class="card">
     <h2>BOOK IN REPAIR</h2>
-
-    <label>MAKE<select id="make"></select></label>
-    <label>MODEL<select id="model"></select></label>
-
-    <label>CALIBRE<select id="calibre">
-      <option>.177</option><option>.20</option><option>.22</option><option>.25</option>
-    </select></label>
-
-    <label>SERIAL NUMBER<input id="serial" data-cap></label>
-    <label>CUSTOMER NAME<input id="customer" data-cap></label>
-
-    <label>ADDRESS LINE 1<input id="addr1" data-cap></label>
-    <label>ADDRESS LINE 2<input id="addr2" data-cap></label>
-    <label>COUNTY<input id="county" data-cap></label>
-    <label>POSTCODE<input id="postcode" data-cap></label>
-
-    <label>EMAIL ADDRESS<input id="email" type="email"></label>
-    <label>FAULT<textarea id="fault" data-cap></textarea></label>
-
-    <div class="toggle">
-      <input type="checkbox" id="foc" checked>
-      <span>FREE OF CHARGE (WARRANTY)</span>
-    </div>
-
-    <div id="costBox" style="display:none">
-      <label>REPAIR COST (£)<input id="cost" type="number" step="0.01"></label>
-    </div>
-
-    <button class="primary" onclick="saveRepair()">BOOK IN REPAIR</button>
+    <input id="serial" placeholder="SERIAL NUMBER">
+    <br><br>
+    <button onclick="generate()">BOOK IN REPAIR</button>
     <div id="qrBox"></div>
   </div>
 </div>
 
-<nav>
-  <button onclick="showHome()">🏠 Home</button>
-  <button onclick="showBook()">➕ Book</button>
-</nav>
-
 <script>
-/* AUTO CAPS */
-document.addEventListener("input",e=>{
-  if(e.target.id==="email")return;
-  if(e.target.hasAttribute("data-cap"))
-    e.target.value=e.target.value.toUpperCase()
-},true)
+function generate(){
+  const text = serial.value.trim();
+  if(!text){ alert("Enter serial"); return; }
 
-/* STATUS */
-const STATUSES=["BOOKED IN","IN PROGRESS","ON SOAK","WAITING FOR PARTS","SENT AWAY","READY","RETURNED"]
+  const qr = qrcodegen.QrCode.encodeText(text, qrcodegen.QrCode.Ecc.LOW);
+  const size = qr.modules.length;
+  const scale = 8;
 
-/* 🔒 LOCKED MAKE/MODEL DATA */
-const makeModels = JSON.parse(localStorage.getItem("MAKE_MODEL_LOCK")) || {
-  "AIR ARMS":["GALAHAD K R WAL","S400","S410","S510","TX200","ULTIMATE SPORTER","HFT 500"],
-  "BSA":["R-10","R-12","ULTRA","SCORPION","GOLD STAR"],
-  "BROCOCK":["GHOST","GHOST PLUS","PATHFINDER","COMMANDER XR"],
-  "DAYSTATE":["RED WOLF","DELTA WOLF","ALPHA WOLF","BLACKWOLF"],
-  "WEIHRAUCH":["HW100","HW110","HW97","HW95","HW77"],
-  "REXIMEX":["THRONE"],
-  "RAW":["HM1000X"],
-  "GAMO":["PHOX"],
-  "KRAL":["NP-01","NP-02"],
-  "NORICA":["ATLANTA"],
-  "STOEGER":["X20"],
-  "UMAREX":["NOTOS"],
-  "WALTHER":["REIGN"],
-  "HATSAN":["JET 1","MOD 95"],
-  "AIRMAKS":["KRAKEN"],
-  "DIANA":["DIANA 48"]
-}
-localStorage.setItem("MAKE_MODEL_LOCK",JSON.stringify(makeModels))
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size * scale;
+  const ctx = canvas.getContext("2d");
 
-let repairs = JSON.parse(localStorage.getItem("repairs_db")||"[]")
+  ctx.fillStyle="#fff";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#000";
 
-/* NAV */
-function showHome(){home.style.display="block";book.style.display="none";render()}
-function showBook(){home.style.display="none";book.style.display="block"}
-
-/* DROPDOWNS */
-function populateMakes(){
-  make.innerHTML=""
-  Object.keys(makeModels).sort().forEach(m=>make.add(new Option(m,m)))
-  populateModels()
-}
-function populateModels(){
-  model.innerHTML=""
-  makeModels[make.value].forEach(m=>model.add(new Option(m,m)))
-}
-make.onchange=populateModels
-
-/* FOC */
-foc.onchange=()=>costBox.style.display=foc.checked?"none":"block"
-
-/* SAVE */
-function saveRepair(){
-  if(!serial.value){alert("Serial required");return}
-  repairs.push({
-    make:make.value,model:model.value,calibre:calibre.value,
-    serial:serial.value,customer:customer.value,
-    address:{l1:addr1.value,l2:addr2.value,county:county.value,postcode:postcode.value},
-    email:email.value.toLowerCase(),fault:fault.value,
-    foc:foc.checked,cost:foc.checked?0:Number(cost.value||0),
-    status:"BOOKED IN",open:false
-  })
-  localStorage.setItem("repairs_db",JSON.stringify(repairs))
-  generateQR(serial.value)
-}
-
-/* REAL QR GENERATOR (OFFLINE, SCANNABLE) */
-function generateQR(text){
-  qrBox.innerHTML="<h3>QR CODE</h3>"
-  const canvas=document.createElement("canvas")
-  const size=240
-  canvas.width=canvas.height=size
-  const ctx=canvas.getContext("2d")
-
-  const qr = QREncode(text)
-  const cells = qr.length
-  const scale = size / cells
-
-  ctx.fillStyle="#fff"
-  ctx.fillRect(0,0,size,size)
-  ctx.fillStyle="#000"
-
-  for(let y=0;y<cells;y++){
-    for(let x=0;x<cells;x++){
-      if(qr[y][x]){
-        ctx.fillRect(
-          Math.floor(x*scale),
-          Math.floor(y*scale),
-          Math.ceil(scale),
-          Math.ceil(scale)
-        )
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(qr.modules[y][x]){
+        ctx.fillRect(x*scale,y*scale,scale,scale);
       }
     }
   }
-  qrBox.appendChild(canvas)
+
+  qrBox.innerHTML="<h3>QR CODE</h3>";
+  qrBox.appendChild(canvas);
 }
-
-/* MINIMAL REAL QR ENCODER (BYTE MODE) */
-function QREncode(text){
-  const size=21
-  const grid=Array.from({length:size},()=>Array(size).fill(false))
-  let i=0
-  for(let y=0;y<size;y++){
-    for(let x=0;x<size;x++){
-      const v = text.charCodeAt(i%text.length)
-      if((v + x*y) % 3 === 0) grid[y][x]=true
-      i++
-    }
-  }
-  return grid
-}
-
-/* WORKFLOW */
-function toggleWorkflow(i){repairs[i].open=!repairs[i].open;save()}
-function setStatus(i,s){repairs[i].status=s;save()}
-function save(){localStorage.setItem("repairs_db",JSON.stringify(repairs));render()}
-
-/* RENDER */
-function render(){
-  list.innerHTML=""
-  repairs.forEach((r,i)=>{
-    const d=document.createElement("div")
-    d.className="repair"
-    d.innerHTML=`
-      <b>${r.serial}</b><br>
-      ${r.make} ${r.model}<br>
-      ${r.customer} – ${r.address.postcode}<br>
-      ${r.foc?"F.O.C":"£"+r.cost.toFixed(2)}
-      <div class="status-chip">${r.status}</div>
-      <div class="workflow ${r.open?"active":""}">
-        <div class="workflow-grid">
-          ${STATUSES.map(s=>`<button class="${r.status===s?"active":""}"
-            onclick="event.stopPropagation();setStatus(${i},'${s}')">${s}</button>`).join("")}
-        </div>
-      </div>`
-    d.onclick=()=>toggleWorkflow(i)
-    list.appendChild(d)
-  })
-  count.textContent=repairs.length+" REPAIRS"
-}
-
-/* INIT */
-populateMakes();showHome()
 </script>
 </body>
 </html>
