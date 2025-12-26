@@ -15,24 +15,109 @@
   --accent:#2563eb;
   --chip:#eef2ff;
 }
-body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;color:var(--text);}
-header{padding:14px 16px;font-size:20px;font-weight:700;border-bottom:1px solid var(--border);}
-.page{padding:16px;padding-bottom:100px;}
-.card{background:var(--card);border-radius:16px;padding:16px;max-width:520px;margin:auto;}
+body{
+  margin:0;
+  background:var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
+  color:var(--text);
+}
+header{
+  padding:14px 16px;
+  font-size:20px;
+  font-weight:700;
+  border-bottom:1px solid var(--border);
+}
+.page{
+  padding:16px;
+  padding-bottom:100px;
+}
+.card{
+  background:var(--card);
+  border-radius:16px;
+  padding:16px;
+  max-width:520px;
+  margin:auto;
+}
 h2{margin:0 0 16px;}
-label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:18px;}
-label small{font-size:11px;font-weight:400;}
-input,select,textarea{padding:12px;border-radius:12px;border:1px solid var(--border);font-size:15px;}
-button.primary{width:100%;padding:14px;border:none;border-radius:14px;background:var(--accent);color:white;font-size:16px;font-weight:700;}
-.repair{border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;}
-.status-chip{display:inline-block;background:var(--chip);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700;margin-top:6px;}
-.workflow{margin-top:12px;display:none;}
+label{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-size:12px;
+  font-weight:600;
+  color:var(--muted);
+  margin-bottom:18px;
+}
+input,select,textarea{
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  font-size:15px;
+}
+button.primary{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:var(--accent);
+  color:white;
+  font-size:16px;
+  font-weight:700;
+}
+.repair{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:12px;
+}
+.status-chip{
+  display:inline-block;
+  background:var(--chip);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:700;
+  margin-top:6px;
+}
+.workflow{
+  margin-top:12px;
+  display:none;
+}
 .workflow.active{display:block;}
-.workflow-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.workflow button{padding:10px;border-radius:12px;border:1px solid var(--border);background:#fff;font-weight:700;font-size:12px;}
-.workflow button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0;}
-nav button{border:none;background:none;font-size:14px;}
+.workflow-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.workflow button{
+  padding:10px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#fff;
+  font-weight:700;
+  font-size:12px;
+}
+.workflow button.active{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:white;
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:space-around;
+  padding:10px 0;
+}
+nav button{
+  border:none;
+  background:none;
+  font-size:14px;
+}
 </style>
 </head>
 
@@ -40,6 +125,7 @@ nav button{border:none;background:none;font-size:14px;}
 
 <header>Airgun Repair Tracker</header>
 
+<!-- HOME -->
 <div class="page" id="home">
   <div class="card">
     <h2>REPAIRS</h2>
@@ -48,6 +134,7 @@ nav button{border:none;background:none;font-size:14px;}
   </div>
 </div>
 
+<!-- BOOK -->
 <div class="page" id="book" style="display:none;">
   <div class="card">
     <h2>BOOK IN REPAIR</h2>
@@ -62,7 +149,10 @@ nav button{border:none;background:none;font-size:14px;}
 
     <label>CALIBRE
       <select id="calibre">
-        <option>.177</option><option>.20</option><option>.22</option><option>.25</option>
+        <option>.177</option>
+        <option>.20</option>
+        <option>.22</option>
+        <option>.25</option>
       </select>
     </label>
 
@@ -88,87 +178,129 @@ nav button{border:none;background:none;font-size:14px;}
 </nav>
 
 <script>
-/* ========= CONSTANTS ========= */
-const REPAIR_KEY="repairs_db";
-const MODEL_KEY="make_model_master_excel";
+/* ================= AUTO CAPITALS ================= */
+document.addEventListener("input", e=>{
+  const el=e.target;
+  if(!el.hasAttribute("data-cap")) return;
+  const p=el.selectionStart;
+  el.value=el.value.toUpperCase();
+  if(p!==null) el.setSelectionRange(p,p);
+}, true);
 
-/* ========= AUTO CAPS ========= */
-document.addEventListener("input",e=>{
-  if(!e.target.dataset.cap) return;
-  e.target.value = e.target.value.toUpperCase();
-});
+/* ================= STATUS ================= */
+const STATUSES=[
+  "BOOKED IN","IN PROGRESS","ON SOAK",
+  "WAITING FOR PARTS","SENT AWAY","READY","RETURNED"
+];
 
-/* ========= SEED MODELS (ALWAYS) ========= */
-function seedModels(){
-  return {
-    "AIR ARMS":["S400","S410","S510","TX200","GALAHAD","KYMIRA","S200"],
-    "BSA":["R10","R12","ULTRA","SCORPION"],
-    "BROCOCK":["BRK GHOST","COMMANDER XR","SNIPER XR"],
-    "DAYSTATE":["DELTA WOLF","RED WOLF","ALPHA WOLF","BLACKWOLF"],
-    "WEIHRAUCH":["HW100","HW110","HW97","HW95"],
-    "RAW":["HM1000X"],
-    "REXIMEX":["THRONE"],
-    "AIRMAKS":["KRAKEN","PRIME"]
-  };
-}
+/* ================= LOCKED MODEL DATA ================= */
+const makeModels = {
+  "AIR ARMS":[
+    "GALAHAD K R WAL","GALAHAD K R TAC","KYMIRA LAM","HFT 500",
+    "S400","S400 WAL","S400 THW","S400 S/L TRAD","S400 S/L HUNT",
+    "S400K","S400K WAL","S400K THW","S400K S/L HUNT","S400K S/L TRAD",
+    "S410","S410 WAL","S410 THW","S410 S/L TRAD","S410 S/L HUNT","S410 TDR WALNUT",
+    "S410K","S410K WAL","S410K THW","S410K S/L HUNT","S410K S/L TRAD","S410K TDR WALNUT",
+    "S500","S500 WAL","S500 THW","S500 S/L TRAD","S500 S/L HUNT",
+    "S510","S510 R","S510 R TACTICAL","S510 XS","S510 XS S/L","S510 XS TACTICAL","S510 TACTICAL",
+    "TX200","TX200 HC","TX200 MK3","TX200 WAL","TX200 HC WAL",
+    "TX200 HC ULT/SPR BLK BEECH","TX200 HC ULT/SPR LAM",
+    "ULTIMATE SPORTER WAL","HFT 500 BRONZE","S200","S200 WAL","S200 HFT"
+  ],
+  "BSA":[
+    "BUCCANEER","BUCCANEER SE","GOLD STAR","LIGHTNING",
+    "R-10","R-10 SE","R-10 TH","R-10 TAC","R10 SE SUPER CARBINE WALNUT","R10 SE WALNUT",
+    "R-12 CLX PRO GREEN LAM CB","R-12 CLX PRO LAM CB","R-12 CLX PRO WAL CB",
+    "R-12 K CLX WAL","R-12 K SLX WAL","R-12 SE WAL","R-12 SLX WAL",
+    "SCORPION TS TAC","ULTRA","ULTRA CLX SL","ULTRA SE","ULTRA TS TAC",
+    "R-10 SE SUPER CARBINE THUMBHOLE","R-10 THUMBHOLE",
+    "R-12 K","R-12 SE","R-12 SLX","R-12 CLX","SCORPION SE","SCORPION"
+  ],
+  "BROCOCK":[
+    "BRK GHOST","BRK GHOST SILVER","BRK GHOST PLUS","BRK GHOST PLUS SILVER",
+    "BRK GHOST PLUS W/R LE","BRK GHOST ZERO",
+    "BRK PATHFINDER","BRK PATHFINDER O.D. GREEN",
+    "COMMANDER XR","COMMANDER XR H/LITE SYN","COMMANDER XR H/LITE CERAKOTE",
+    "CONCEPT XR","RANGER XR","SNIPER XR","SNIPER XR H/LITE SYN",
+    "SNIPER XR H/LITE LAM","SNIPER XR H/LITE SAFARI","SNIPER XR H/LITE SAHARA",
+    "COMP SNIPER XR SYN","COMP SNIPER XR SOFT TOUCH"
+  ],
+  "DAYSTATE":[
+    "DELTA WOLF","DELTA WOLF BRONZE","HUNTSMAN","HUNTSMAN CLASSIC",
+    "RED WOLF","RED WOLF HI-LITE","WOLVERINE",
+    "BLACKWOLF R C CARBON","BLACKWOLF R C LAM","BLACKWOLF R C WAL",
+    "BLACKWOLF R B CARBON","BLACKWOLF R B LAM","BLACKWOLF R B WAL","BLACKWOLF R B TAC","BLACKWOLF R C TAC",
+    "ALPHA WOLF TAC LAM","ALPHA WOLF BRONZE SAFARI","ALPHA WOLF BLUE SE"
+  ],
+  "WEIHRAUCH":[
+    "HW100","HW100 BP","HW100 KT","HW100 T","HW110","HW77","HW80","HW95","HW97","HW98",
+    "HW30","HW35","HW97K","HW97KT","HW77K","HW77KT","HW95K","HW99S",
+    "HW44","HW40","HW30 S KIT","HW100T BLK SYN FSB","HW100 KT GREY LAM SILVER",
+    "HW45","HW100 T LAM","HW30 JUNIOR FO-SIGHTS","HW97K BLUE LAM",
+    "HW100X-KT","HW100X-KT LAM ADJ","HW100X-S LAM ADJ","HW100X-T","HW95K ADJ"
+  ],
+  "REXIMEX":["THRONE"],
+  "RAW":["HM1000X","HM1000X LRT"],
+  "GAMO":["PHOX"],
+  "KRAL":["NP-01","NP-02","NP-03"],
+  "NORICA":["ATLANTA","OMNIA"],
+  "STOEGER":["X10","X20"],
+  "UMAREX":["NOTOS"],
+  "WALTHER":["REIGN"],
+  "HATSAN":["JET 1","JET 2","MOD 95"],
+  "AIRMAKS":["ARMS PRIME 1","KRAKEN","KRAKEN X"],
+  "PISTOLS":["AIRBUG","AIRTAC","CP2","ZORAKI"],
+  "DIANA":["DIANA 48"]
+};
 
-/* ========= LOAD DATA ========= */
-let makeModels = JSON.parse(localStorage.getItem(MODEL_KEY));
-if(!makeModels){
-  makeModels = seedModels();
-  localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));
-}
-let repairs = JSON.parse(localStorage.getItem(REPAIR_KEY)||"[]");
+/* ================= DATA ================= */
+let repairs = JSON.parse(localStorage.getItem("repairs_db")||"[]");
 
-/* ========= NAV ========= */
+/* ================= NAV ================= */
 function showHome(){home.style.display="block";book.style.display="none";render();}
 function showBook(){home.style.display="none";book.style.display="block";}
 
-/* ========= DROPDOWNS ========= */
+/* ================= DROPDOWNS ================= */
 function populateMakes(){
   make.innerHTML="";
-  Object.keys(makeModels).sort().forEach(m=>{
-    make.add(new Option(m,m));
-  });
+  Object.keys(makeModels).sort().forEach(m=>make.add(new Option(m,m)));
   populateModels();
 }
 function populateModels(){
   model.innerHTML="";
-  (makeModels[make.value]||[]).forEach(m=>{
-    model.add(new Option(m,m));
-  });
+  makeModels[make.value].forEach(m=>model.add(new Option(m,m)));
 }
 make.onchange=populateModels;
 
-/* ========= SAVE ========= */
+/* ================= SAVE ================= */
 function saveRepair(){
   repairs.push({
     make:make.value,
     model:model.value,
     calibre:calibre.value,
-    serial:serial.value.toUpperCase(),
-    customer:customer.value.toUpperCase(),
-    fault:fault.value.toUpperCase(),
+    serial:serial.value,
+    customer:customer.value,
+    fault:fault.value,
     status:"BOOKED IN",
     open:false
   });
-  localStorage.setItem(REPAIR_KEY,JSON.stringify(repairs));
+  localStorage.setItem("repairs_db",JSON.stringify(repairs));
   showHome();
 }
 
-/* ========= WORKFLOW ========= */
+/* ================= WORKFLOW ================= */
 function toggleWorkflow(i){
   repairs[i].open=!repairs[i].open;
-  localStorage.setItem(REPAIR_KEY,JSON.stringify(repairs));
+  localStorage.setItem("repairs_db",JSON.stringify(repairs));
   render();
 }
 function setStatus(i,s){
   repairs[i].status=s;
-  localStorage.setItem(REPAIR_KEY,JSON.stringify(repairs));
+  localStorage.setItem("repairs_db",JSON.stringify(repairs));
   render();
 }
 
-/* ========= RENDER ========= */
+/* ================= RENDER ================= */
 function render(){
   list.innerHTML="";
   repairs.forEach((r,i)=>{
@@ -178,6 +310,14 @@ function render(){
       <strong>${r.serial}</strong><br>
       ${r.make} ${r.model}
       <div class="status-chip">${r.status}</div>
+      <div class="workflow ${r.open?'active':''}">
+        <div class="workflow-grid">
+          ${STATUSES.map(s=>`
+            <button class="${r.status===s?'active':''}"
+              onclick="event.stopPropagation();setStatus(${i},'${s}')">${s}</button>
+          `).join("")}
+        </div>
+      </div>
     `;
     d.onclick=()=>toggleWorkflow(i);
     list.appendChild(d);
@@ -185,7 +325,7 @@ function render(){
   count.textContent=repairs.length+" REPAIRS";
 }
 
-/* ========= INIT ========= */
+/* ================= INIT ================= */
 populateMakes();
 showHome();
 </script>
