@@ -162,48 +162,69 @@ nav button{
 
 <script>
 /* ================= STORAGE ================= */
-const REPAIR_KEY = "repairs_db";
-const MODEL_KEY  = "make_model_full_db";
+const REPAIR_KEY="repairs_db";
+const MODEL_KEY="make_model_master";
 
-let repairs = JSON.parse(localStorage.getItem(REPAIR_KEY) || "[]");
-let makeModels = JSON.parse(localStorage.getItem(MODEL_KEY) || "null");
-
-/* ================= FULL MAKE / MODEL LIST ================= */
+/* ================= FULL MASTER LIST ================= */
+let makeModels = JSON.parse(localStorage.getItem(MODEL_KEY));
 if(!makeModels){
 makeModels = {
-  "AIR ARMS": ["S200","S200 WAL","S400","S400K","S410","S410K","S500","S510","TX200","TX200 HC","ULTIMATE SPORTER","GALAHAD","KYMIRA"],
-  "BSA": ["R10","R10 SE","R12","ULTRA","SCORPION","LIGHTNING","GOLD STAR"],
-  "BROCOCK": ["BRK GHOST","BRK GHOST PLUS","COMMANDER XR","SNIPER XR","PATHFINDER"],
-  "DAYSTATE": [
-    "DELTA WOLF","DELTA WOLF BRONZE",
-    "RED WOLF","RED WOLF HI-LITE",
-    "ALPHA WOLF TAC LAM",
-    "ALPHA WOLF BRONZE SAFARI",
-    "ALPHA WOLF BLUE SE",
-    "WOLVERINE",
-    "BLACKWOLF R C","BLACKWOLF R B"
-  ],
-  "WEIHRAUCH": ["HW30","HW35","HW77","HW80","HW95","HW97","HW100","HW110","HW44","HW45"],
-  "RAW": ["HM1000X","HM1000X LRT"],
-  "REXIMEX": ["THRONE"],
-  "HATSAN": ["JET 1","JET 2","MOD 95"],
-  "GAMO": ["PHOX"],
-  "STOEGER": ["X10","X20"],
-  "UMAREX": ["NOTOS"],
-  "WALTHER": ["REIGN"],
-  "NORICA": ["ATLANTA","OMNIA"],
-  "DIANA": ["48"],
-  "AIRMAKS": ["KRAKEN","KRAKEN X","PRIME"]
+"AIR ARMS":[
+"S200","S200 WAL","S200 HFT",
+"S400","S400 WAL","S400K",
+"S410","S410 WAL","S410K","S410 TDR WALNUT",
+"S500","S500 WAL",
+"S510","S510 R","S510 XS","S510 TACTICAL",
+"TX200","TX200 HC","TX200 MK3","TX200 WAL",
+"ULTIMATE SPORTER","GALAHAD","KYMIRA"
+],
+"BSA":[
+"BUCCANEER","BUCCANEER SE","GOLD STAR","LIGHTNING",
+"R10","R10 SE","R10 TH",
+"R12","R12 SE","R12 SLX","R12 CLX",
+"ULTRA","ULTRA SE","SCORPION","SCORPION SE"
+],
+"BROCOCK":[
+"BRK GHOST","BRK GHOST PLUS","BRK GHOST ZERO",
+"PATHFINDER","COMMANDER XR","SNIPER XR","CONCEPT XR","RANGER XR"
+],
+"DAYSTATE":[
+"DELTA WOLF","DELTA WOLF BRONZE",
+"RED WOLF","RED WOLF HI-LITE",
+"ALPHA WOLF TAC LAM",
+"ALPHA WOLF BRONZE SAFARI",
+"ALPHA WOLF BLUE SE",
+"WOLVERINE",
+"BLACKWOLF R C CARBON","BLACKWOLF R C LAM","BLACKWOLF R C WAL",
+"BLACKWOLF R B CARBON","BLACKWOLF R B LAM","BLACKWOLF R B WAL","BLACKWOLF R B TAC"
+],
+"WEIHRAUCH":[
+"HW30","HW35","HW40","HW44","HW45",
+"HW77","HW77K","HW80","HW95","HW95K",
+"HW97","HW97K","HW98",
+"HW100","HW100 S","HW100 KT","HW100 T",
+"HW110","HW99S"
+],
+"RAW":["HM1000X","HM1000X LRT"],
+"REXIMEX":["THRONE"],
+"HATSAN":["JET 1","JET 2","MOD 95"],
+"GAMO":["PHOX"],
+"STOEGER":["X10","X20"],
+"UMAREX":["NOTOS"],
+"WALTHER":["REIGN"],
+"NORICA":["ATLANTA","OMNIA"],
+"DIANA":["48"],
+"AIRMAKS":["PRIME","KRAKEN","KRAKEN X"]
 };
-localStorage.setItem(MODEL_KEY, JSON.stringify(makeModels));
+localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));
 }
 
-/* ================= HELPERS ================= */
+/* ================= APP LOGIC ================= */
+let repairs=JSON.parse(localStorage.getItem(REPAIR_KEY)||"[]");
+
 function caps(v){return v.toUpperCase();}
 function saveRepairs(){localStorage.setItem(REPAIR_KEY,JSON.stringify(repairs));}
-function saveModels(){localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));}
 
-/* ================= NAV ================= */
 function showHome(){
   home.style.display="block";
   book.style.display="none";
@@ -214,7 +235,6 @@ function showBook(){
   book.style.display="block";
 }
 
-/* ================= DROPDOWNS ================= */
 function populateMakes(){
   make.innerHTML="";
   Object.keys(makeModels).sort().forEach(m=>{
@@ -226,7 +246,7 @@ function populateMakes(){
 }
 function populateModels(){
   model.innerHTML="";
-  (makeModels[make.value]||[]).forEach(m=>{
+  makeModels[make.value].forEach(m=>{
     const o=document.createElement("option");
     o.textContent=m;
     model.appendChild(o);
@@ -234,13 +254,12 @@ function populateModels(){
 }
 make.onchange=populateModels;
 
-/* ================= ADD MAKE / MODEL ================= */
 make.ondblclick=()=>{
   const m=prompt("ADD NEW MAKE");
   if(!m)return;
   const M=caps(m);
-  if(!makeModels[M]) makeModels[M]=[];
-  saveModels();
+  if(!makeModels[M])makeModels[M]=[];
+  localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));
   populateMakes();
   make.value=M;
 };
@@ -249,12 +268,11 @@ model.ondblclick=()=>{
   if(!m)return;
   const M=caps(m);
   makeModels[make.value].push(M);
-  saveModels();
+  localStorage.setItem(MODEL_KEY,JSON.stringify(makeModels));
   populateModels();
   model.value=M;
 };
 
-/* ================= SAVE ================= */
 function saveRepair(){
   repairs.push({
     make:make.value,
@@ -269,7 +287,6 @@ function saveRepair(){
   showHome();
 }
 
-/* ================= LIST ================= */
 function render(){
   list.innerHTML="";
   repairs.forEach(r=>{
@@ -285,7 +302,6 @@ function render(){
   count.textContent=repairs.length+" REPAIRS";
 }
 
-/* ================= INIT ================= */
 populateMakes();
 showHome();
 </script>
