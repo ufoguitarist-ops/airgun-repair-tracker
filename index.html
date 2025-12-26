@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Airgun Repair Tracker</title>
-
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
@@ -14,30 +13,27 @@
   <button id="themeBtn" class="icon-btn">🌙</button>
 </header>
 
-<!-- ================= HOME / REPAIR LIST ================= -->
+<!-- ================= HOME ================= -->
 <main class="page" id="home">
-
   <div class="form-card">
     <h2>REPAIRS</h2>
     <div id="repairList"></div>
-    <p id="homeCount" class="muted"></p>
+    <p id="homeCount"></p>
   </div>
-
 </main>
 
-<!-- ================= BOOK IN REPAIR ================= -->
+<!-- ================= BOOK ================= -->
 <main class="page" id="book" style="display:none;">
-
-  <form id="bookForm" class="form-card">
+  <form class="form-card">
 
     <h2>BOOK IN REPAIR</h2>
 
     <label>
       ITEM TYPE
       <select id="itemType" data-cap>
-        <option value="RIFLE">RIFLE</option>
-        <option value="PISTOL">PISTOL</option>
-        <option value="OTHER">OTHER</option>
+        <option>RIFLE</option>
+        <option>PISTOL</option>
+        <option>OTHER</option>
       </select>
     </label>
 
@@ -57,16 +53,16 @@
       CALIBRE
       <select id="calibre" data-cap>
         <option value="">SELECT CALIBRE</option>
-        <option value=".177">.177</option>
-        <option value=".20">.20</option>
-        <option value=".22">.22</option>
-        <option value=".25">.25</option>
+        <option>.177</option>
+        <option>.20</option>
+        <option>.22</option>
+        <option>.25</option>
       </select>
     </label>
 
     <label>
       SERIAL NUMBER
-      <input id="serial" data-cap required />
+      <input id="serial" data-cap />
     </label>
 
     <label>
@@ -104,10 +100,9 @@
     </button>
 
   </form>
-
 </main>
 
-<!-- ================= BOTTOM NAV ================= -->
+<!-- ================= NAV ================= -->
 <nav class="bottom-nav">
   <button onclick="showHome()">🏠<span>Home</span></button>
   <button onclick="showBook()">➕<span>Book</span></button>
